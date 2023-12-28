@@ -1,4 +1,4 @@
-import { Button, Container, TextField } from "@mui/material";
+import { Autocomplete, Button, Container, TextField } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
@@ -177,15 +177,19 @@ export const CreateInvoice = () => {
     dispatch({ type: GET_COURSE_FEE, payload: formData.selectedCourse });
   }, [dispatch, formData.selectedDuration, formData.selectedCourse]);
 
-  const renderStudents = useMemo(
-    () =>
-      students.map((student, ind) => (
-        <MenuItem value={student.id} key={ind}>
-          {student?.name}
-        </MenuItem>
-      )),
-    [students]
-  );
+  // const renderStudents = useMemo(
+  //   () =>
+  //     students.map((student, ind) => (
+  //       <MenuItem value={student.id} key={ind}>
+  //         {student?.name}
+  //       </MenuItem>
+  //     )),
+  //   [students]
+  // );
+  const renderStudents = students.map((student) => ({
+    value: student.id,
+    label: student.name,
+  }));
 
   const renderDuration = useMemo(() => {
     const uniqueDurations = new Set();
@@ -327,7 +331,7 @@ export const CreateInvoice = () => {
             >
               <Grid container spacing={1}>
                 <Grid item xs={6}>
-                  <FormControl sx={{ width: "100%", marginTop: 2 }} required>
+                  {/* <FormControl sx={{ width: "100%", marginTop: 2 }} required>
                     <InputLabel id="demo-simple-select-label">
                       Select Student
                     </InputLabel>
@@ -345,6 +349,31 @@ export const CreateInvoice = () => {
                         renderStudents
                       )}
                     </Select>
+                  </FormControl> */}
+                    <FormControl sx={{ width: "100%", marginTop: 2 }} required>
+                    <Autocomplete
+                      id="selected_student"
+                      options={renderStudents}
+                      getOptionLabel={(option) => option.label}
+                      value={
+                        renderStudents.find(
+                          (student) =>
+                            student.value === formData.selectedStudent
+                        ) || null
+                      }
+                      onChange={(event, newValue) => {
+                        handleChange({
+                          target: {
+                            name: "selectedStudent",
+                            value: newValue ? newValue.value : "",
+                          },
+                        });
+                      }}
+                      renderInput={(params) => (
+                        <TextField {...params} label="Select Student" />
+                      )}
+                    />
+                    {loading && <div>Loading...</div>}
                   </FormControl>
                   {error.selectedStudent && (
                     <Typography className="emailError">
