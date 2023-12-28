@@ -7,7 +7,6 @@ import { _saveStudents, _saveStudent, setLoading, studentCreated } from "../Slic
   
   function* getStudents(action) {
     try {
-      console.log(action, "hfhfhhaction");
       const response = yield call(fetchStudents, action);
       yield put(_saveStudents(response?.data));
     } catch (e) {
@@ -52,6 +51,7 @@ import { _saveStudents, _saveStudent, setLoading, studentCreated } from "../Slic
         toast.success("student has been saved successfully");
       }
     } catch (e) {
+
       toast.error(e?.response?.data?.error?.[0] || e?.response?.data?.message);
       yield put(setLoading(false));
     }

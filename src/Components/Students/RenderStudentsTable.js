@@ -10,18 +10,15 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-
 import { useDispatch, useSelector } from "react-redux";
 import {  DELETE_STUDENT,  GET_STUDENTS } from "../../Store/Action_Constants";
 import Spinner from "../Spinner/Spinner";
-// import { clientCreating, setLoading } from "../../Store/Slices/Clients";
 import { studentCreating,setLoading } from "../../Store/Slices/Students";
-
 import swal from "sweetalert";
 import { useNavigate } from "react-router-dom";
 
 const columns = [
-  { id: "name", label: "Name", minWidth: 180 },
+  { id: "name", label: "Student Name", minWidth: 180 },
   { id: "email", label: "Email", minWidth: 180 },
   { id: "phone", label: "Phone", minWidth: 100 },
   { id: "address", label: "Address", minWidth: 180 },
@@ -41,7 +38,7 @@ export const RenderStudentsTable = () => {
   React.useEffect(() => {
     dispatch(setLoading(true));
     dispatch({ type: GET_STUDENTS });
-  }, []);
+  }, [dispatch]);
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(+event.target.value);
@@ -51,7 +48,7 @@ export const RenderStudentsTable = () => {
   React.useEffect(() => {
     dispatch(setLoading(true));
     dispatch({ type: GET_STUDENTS, payload: { page: page, row: rowsPerPage } });
-  }, [page, rowsPerPage]);
+  }, [dispatch, page, rowsPerPage]);
 
   const handleChangePage = (event, newPage) => {
     setPage(++newPage);
@@ -67,7 +64,7 @@ export const RenderStudentsTable = () => {
 
     const willDelete = await swal({
       title: "Are you sure?",
-      text: "Are you sure that you want to delete this client?",
+      text: "Are you sure that you want to delete this student?",
       icon: "warning",
       buttons: true,
       dangerMode: true,
@@ -116,7 +113,6 @@ export const RenderStudentsTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {console.log(studentsData, columns, "90493940jidjfoj2034")}
             {studentsData?.length > 0
               ? studentsData?.map((row, index) => {
                   return (
@@ -124,7 +120,7 @@ export const RenderStudentsTable = () => {
                       hover
                       role="checkbox"
                       tabIndex={-1}
-                      key={row.code}
+                      key={index}
                     >
                       {columns.map((column) => {
                         let value = row[column.id];
@@ -156,7 +152,6 @@ export const RenderStudentsTable = () => {
           </TableBody>
         </Table>
       </TableContainer>
-      {console.log(totalStudents, rowsPerPage, "totalStudents")}
       <TablePagination
         rowsPerPageOptions={[10, 25, 100]}
         component="div"

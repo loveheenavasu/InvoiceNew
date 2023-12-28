@@ -11,7 +11,8 @@ import ProtectedRoute from "../../Routes/ProtectedRoute";
 import { getCoursePayload } from "../../CommonComponents/coursePayload";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
-import { setLoading } from "../../Store/Slices/Clients";
+// import { setLoading } from "../../Store/Slices/Clients";
+import { setLoading } from "../../Store/Slices/Courses";
 import {
   GET_COURSE,
   SAVE_COURSE,
@@ -35,20 +36,14 @@ export default function CreateCourse() {
   const [courseInfo, setCourseInfo] = React.useState({
     name: "",
     duration: "",
-    fee: null,
+    fee: "",
   });
   const [error, setError] = React.useState({ name: "", duration: "", fee: "" });
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log("form data", data);
     const payload = getCoursePayload(data);
-    console.log("payload", payload);
-
-    // await new Promise((resolve) => setTimeout(resolve, 10));
-
-    console.log(error, "error");
     if (!payload.name || !payload.duration || !payload.fee) {
       toast.error("Please fill all the required fields", {
         toastId: "sender_form",
@@ -68,7 +63,6 @@ export default function CreateCourse() {
       return;
     }
     dispatch(setLoading(true));
-
     if (id) {
       payload.id = courseInfo.id;
       dispatch({
@@ -100,38 +94,34 @@ export default function CreateCourse() {
       !courseCreating &&
       (!isCourseCreating || isCourseCreating === "false")
     ) {
-      navigate("/create_course");
+      navigate("/course");
     }
-  }, [courseCreating]);
-
- 
-  const isNumericFee = (fee) => /^[0-9]+$/.test(fee);
+  }, [courseCreating, isCourseCreating, navigate]);
 
   const handleInput = (e) => {
-    console.log("heellllo", e.target.value);
 
     if (e.target.name === "name") {
-      if (e.target.value === "" ) {
-        setError({ ...error, name: "Name is invalid" });
+      if (e.target.value === "") {
+        setError({ ...error, name: "Course Name is required" });
       } else {
         setError({ ...error, name: "" });
       }
     }
     if (e.target.name === "duration") {
-      if (e.target.value === "" ) {
+      if (e.target.value === "") {
         setError({
           ...error,
-          duration: "Duration must be numbers",
+          duration: "Duration is required",
         });
       } else {
         setError({ ...error, duration: "" });
       }
     }
     if (e.target.name === "fee") {
-      if (e.target.value === "" && !isNumericFee(e.target.value)) {
+      if (e.target.value === "") {
         setError({
           ...error,
-          fee: "Fee must be numbers",
+          fee: "Fee is required",
         });
       } else {
         setError({ ...error, fee: "" });
@@ -171,45 +161,51 @@ export default function CreateCourse() {
                     required
                     fullWidth
                     id="coursename"
-                    label="Couse Name"
+                    label="Course Name"
                     name="name"
                     autoComplete="coursename"
                     inputProps={{ sx: { height: 10, marginTop: 1 } }}
                     onChange={handleInput}
                     value={courseInfo.name}
                   />
-                  <Typography className="emailError">{error.name}</Typography>
+                  {error.name && (
+                    <Typography className="emailError">{error.name}</Typography>
+                  )}
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
                     required
                     fullWidth
                     id="Courseduration"
-                    label="Couse Duration "
+                    label="Course Duration "
                     name="duration"
                     autoComplete="Courseduration"
                     inputProps={{ sx: { height: 10, marginTop: 1 } }}
                     onChange={handleInput}
                     value={courseInfo.duration}
                   />
-                  <Typography className="emailError">
-                    {error.duration}
-                  </Typography>
+                  {error.duration && (
+                    <Typography className="emailError">
+                      {error.duration}
+                    </Typography>
+                  )}
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
-                    type="number"
+                    // type="number"
                     required
                     fullWidth
                     id="Coursefee"
-                    label="Couse Fee"
+                    label="Course Fee"
                     name="fee"
                     autoComplete="Coursefee"
                     inputProps={{ sx: { height: 10, marginTop: 1 } }}
-                    onChange={handleInput}
                     value={courseInfo.fee}
+                    onChange={handleInput}
                   />
-                  <Typography className="emailError">{error.fee}</Typography>
+                  {error.fee && (
+                    <Typography className="emailError">{error.fee}</Typography>
+                  )}
                 </Grid>
               </Grid>
               <Box mt={3}>

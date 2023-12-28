@@ -4,7 +4,8 @@ import Button from "@mui/material/Button";
 import ProtectedRoute from "../../Routes/ProtectedRoute";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { clientCreating } from "../../Store/Slices/Clients";
+// import { clientCreating } from "../../Store/Slices/Clients";
+import { courseCreating } from "../../Store/Slices/Courses";
 import { Navbar } from "../Navbar/Navbar";
 import { Footer } from "../Footer/Footer";
 import { RenderCourseTable } from "./RenderCourseTable";
@@ -15,8 +16,8 @@ export const Course = () => {
   localStorage.setItem("clientcreating", false);
 
   const addCourse = () => {
-    localStorage.setItem("clientcreating", true);
-    dispatch(clientCreating(true));
+    localStorage.setItem("coursecreating", true);
+    dispatch(courseCreating(true));
     navigate("/create_course");
   };
 

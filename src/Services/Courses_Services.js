@@ -1,7 +1,6 @@
 import { AXIOS } from "./Setup";
 
 export const fetchCourses = (action) => {
-  console.log(action.dropdown, "84848fff4848ddd48");
   const params = {
     page: action?.payload?.page ? action?.payload?.page : 1,
     rows: action?.payload?.row ? action?.payload?.row : 10,
@@ -20,7 +19,7 @@ export const createCourse = (action) => {
 };
 
 export const editCourse = (action) => {
-  return AXIOS.put("update-course", action?.payload);
+  return AXIOS.put(`update-course/${action.payload.id}`,action.payload);
 };
 
 export const fetchCourse = (action) => {

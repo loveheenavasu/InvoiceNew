@@ -14,31 +14,29 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { useDispatch, useSelector } from "react-redux";
 import {  DELETE_COURSE, GET_COURSES } from "../../Store/Action_Constants";
 import Spinner from "../Spinner/Spinner";
-// import { clientCreating, setLoading } from "../../Store/Slices/Clients";
 import {courseCreating, setLoading} from "../../Store/Slices/Courses"
 import swal from "sweetalert";
 import { useNavigate } from "react-router-dom";
 
 const columns = [
-  { id: "name", label: "Name", minWidth: 180 },
-  { id: "duration", label: "Duration", minWidth: 180 },
-  { id: "fee", label: "Fee", minWidth: 180 },
+  { id: "name", label: "Course Name", minWidth: 180 },
+  { id: "duration", label: "Course Duration", minWidth: 180 },
+  { id: "fee", label: "Course Fee", minWidth: 180 },
   { id: "actions", label: "ACTIONS", minWidth: 100 },
 ];
 
 export const RenderCourseTable = () => {
   const {loading, courses, totalCourses  } = useSelector((state) => state.Courses) || {};
-// console.log("122212121", data )
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [page, setPage] = React.useState(1);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [coursesData, setCoursesData] = React.useState([]);
-console.log("coursesData", coursesData)
+
   React.useEffect(() => {
     dispatch(setLoading(true));
     dispatch({ type: GET_COURSES });
-  }, []);
+  }, [dispatch]);
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(+event.target.value);
@@ -48,7 +46,7 @@ console.log("coursesData", coursesData)
   React.useEffect(() => {
     dispatch(setLoading(true));
     dispatch({ type: GET_COURSES, payload: { page: page, row: rowsPerPage } });
-  }, [page, rowsPerPage]);
+  }, [dispatch, page, rowsPerPage]);
 
   const handleChangePage = (event, newPage) => {
     setPage(++newPage);
@@ -56,7 +54,6 @@ console.log("coursesData", coursesData)
 
   const deleteCourse = async (index) => {
     const course_id = courses[index].id;
-    console.log("@@@@", course_id)
     const payload = {
       courseId: course_id,
       page: page,
@@ -83,8 +80,7 @@ console.log("coursesData", coursesData)
   };
 
   React.useEffect(() => {
-    const _courses = courses?.map((course, ind) => {
-      console.log("----888", course)
+    const _courses = courses?.map((course) => {
       return {
         name: course.name || "-",
         duration: course.duration || "-",
@@ -114,7 +110,6 @@ console.log("coursesData", coursesData)
             </TableRow>
           </TableHead>
           <TableBody>
-            {console.log(coursesData, columns, "90493940jidjfoj2034")}
             {coursesData?.length > 0
               ? coursesData?.map((row, index) => {
                   return (
@@ -122,7 +117,7 @@ console.log("coursesData", coursesData)
                       hover
                       role="checkbox"
                       tabIndex={-1}
-                      key={row.code}
+                      key={index}
                     >
                       {columns.map((column) => {
                         let value = row[column.id];
@@ -154,7 +149,6 @@ console.log("coursesData", coursesData)
           </TableBody>
         </Table>
       </TableContainer>
-      {console.log(totalCourses, rowsPerPage, "totalClients")}
       <TablePagination
         rowsPerPageOptions={[10, 25, 100]}
         component="div"

@@ -77,14 +77,14 @@ export const Navbar = () => {
               className="buttonFontSize"
               onClick={() => navigate("/course")}
             >
-              Course
+              Courses
             </Button>
             <Button
               color="inherit"
               className="buttonFontSize"
               onClick={() => navigate("/student")}
             >
-              Student
+              Students
             </Button>
             <Button
               color="inherit"

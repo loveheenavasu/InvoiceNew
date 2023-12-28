@@ -1,7 +1,6 @@
 import { AXIOS } from "./Setup";
 
 export const fetchStudents = (action) => {
-  console.log(action.dropdown, "84848fff4848ddd48");
   const params = {
     page: action?.payload?.page ? action?.payload?.page : 1,
     rows: action?.payload?.row ? action?.payload?.row : 10,
@@ -20,7 +19,7 @@ export const createStudent = (action) => {
 };
 
 export const editStudent = (action) => {
-  return AXIOS.put(`update-student/${action}`, action?.payload);
+  return AXIOS.put(`update-student/${action.payload.id}`,(action.payload) );
 };
 
 export const fetchSingleStudent = (action) => {

@@ -1,123 +1,266 @@
 import { Button, Container, TextField } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import Checkbox from "@mui/material/Checkbox";
-import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
-
 import Box from "@mui/material/Box";
 import { Typography } from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import FormControl from "@mui/material/FormControl";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import InputLabel from "@mui/material/InputLabel";
 import ProtectedRoute from "../../Routes/ProtectedRoute";
 import Spinner from "../Spinner/Spinner";
-import { CreateInvoiceRight } from "./CreateInvoiceRight";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoading } from "../../Store/Slices/Invoice";
-import { GET_CLIENTS, GET_INVOICE } from "../../Store/Action_Constants";
+import {
+  ADD_INVOICE,
+  GET_COURSE_FEE,
+  GET_STUDENTS,
+  GET_COURSE_LIST,
+  UPDATE_INVOICE,
+  GET_COURSES,
+} from "../../Store/Action_Constants";
 import { useNavigate, useParams } from "react-router-dom";
-import swal from "sweetalert";
 import { Navbar } from "../Navbar/Navbar";
 import { Footer } from "../Footer/Footer";
-import moment from "moment";
 import { toast } from "react-toastify";
+import { viewInvoice } from "../../Services/Invoice_Services";
 const theme = createTheme();
+
 export const CreateInvoice = () => {
-  let currentDate = moment(new Date()).format("MMM DD YYYY");
   const dispatch = useDispatch();
-  const [invoiceDate, setInvoiceDate] = React.useState(currentDate);
-  const [dueDate, setDueDate] = React.useState("");
-  const [isTaskToUpdate, setIsTaskToUpdate] = useState(false);
-  const [shareInvoiceWith, setShareInvoiceWith] = useState("");
-  const [indexOfTaskToUpdate, setIndexOfTaskToUpdate] = useState();
-  const [show_sender_bank_details, set_show_sender_bank_details] =
-    useState(true);
-  const [isInvalidDate, setIsInvalidDate] = useState(true);
+  const navigate = useNavigate();
+  const { invoice_Id } = useParams();
+  const Coursefee = useSelector((state) => state.invoices.fee);
+  const courseDuration = useSelector((state) => state.invoices.duration);
+  const { courses } = useSelector((state) => state.Courses) || {};
+  const { loading, students } = useSelector((state) => state.Students);
+  const { invoiceCreating } =
+    useSelector((state) => state.invoices) || {} || [];
+  const [updated, setUpdated] = useState();
+  const [formData, setFormData] = React.useState({
+    selectedStudent: "",
+    selectedDuration: "",
+    selectedCourse: "",
+    selectedCourseFee: "",
+    depositeAmount: "",
+    pendingAmount: "",
+    paymentMethod: "",
+    otherPaymentMethod: "",
+  });
+  const paymentMethods = [
+    "Google Pay",
+    "Phone Pay",
+    "Net Banking",
+    "Credit Card",
+    "Debit Card",
+    "Other",
+  ];
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setError((prevError) => ({
+      ...prevError,
+      [name]: "",
+    }));
+
+    if (name === "selectedDuration") {
+      if (!value) {
+        setError((prevError) => ({
+          ...prevError,
+          selectedDuration: "Duration is required",
+        }));
+      } else {
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          [name]: value,
+        }));
+
+        try {
+          dispatch({
+            type: GET_COURSE_LIST,
+            payload: { course_duration: value },
+          });
+        } catch (error) {
+          console.error("Error dispatching action for course list:", error);
+        }
+      }
+    } else if (name === "selectedCourse") {
+      if (!value) {
+        setError((prevError) => ({
+          ...prevError,
+          selectedCourse: "Course is required",
+        }));
+      } else {
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          [name]: value,
+        }));
+
+        try {
+          dispatch(setLoading(true));
+          dispatch({
+            type: GET_COURSE_FEE,
+            payload: value,
+          });
+        } catch (error) {
+          console.error("Error dispatching action for course fee:", error);
+        }
+      }
+    } else if (name === "paymentMethod" && value === "Other") {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        [name]: value,
+      }));
+    } else if (name === "depositeAmount") {
+      if (!value) {
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          [name]: "",
+          pendingAmount: 0,
+        }));
+        setError((prevError) => ({
+          ...prevError,
+          depositeAmount: "",
+        }));
+      } else {
+        const courseFee = parseFloat(formData.selectedCourseFee) || 0;
+        const depositAmount = parseFloat(value) || 0;
+
+        if (depositAmount <= courseFee) {
+          setFormData((prevFormData) => ({
+            ...prevFormData,
+            [name]: value,
+            pendingAmount: courseFee - depositAmount,
+          }));
+        } else {
+          toast.error("Deposit amount cannot exceed course fee");
+          setError((prevError) => ({
+            ...prevError,
+            depositeAmount: "Deposit amount cannot exceed course fee",
+          }));
+        }
+      }
+    } else {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        [name]: value,
+      }));
+    }
+  };
 
   const [error, setError] = React.useState({
-    studentname: "",
-    duration: "",
+    selectedStudent: "",
+    selectedDuration: "",
+    selectedCourse: "",
+    selectedCourseFee: "",
+    depositeAmount: "",
+    pendingAmount: "",
+    paymentMethod: "",
+    otherPaymentMethod: "",
   });
-
-  const { clients } = useSelector((state) => state.clients);
-  const { invoiceCreating, invoiceToUpdate } = useSelector(
-    (state) => state.invoices
-  );
-  const [selectedClient, setSelectedClient] = React.useState({
-    id: "",
-    index: "",
-    name: "",
-    companyName: "",
-  });
-
-  const [selectedValues, setSelectedValues] = useState({
-    studentname: "",
-    duration: "",
-  });
-
-  const [taskInfo, setTaskInfo] = React.useState({
-    taskName: "",
-    hourly_units_worked: "",
-    totalPrice: "",
-    type: "",
-    number_of_hours: "",
-  });
-
-  const [tasks, setTasks] = React.useState([]);
-  const [totalAmount, setTotalAmount] = useState(0);
-  const [currencyType, setCurrencyType] = useState("");
-  const [currency_symbol, set_currency_symbol] = useState("");
-  const navigate = useNavigate();
-
-  const handleDateChange = (newValue) => {
-    setInvoiceDate(newValue);
-    if (newValue.diff(dueDate, "hour") >= 0) {
-      setDueDate(null);
-      setIsInvalidDate(true);
-    }
-  };
-
-  const { invoiceId } = useParams();
-  const handleDueDateChange = (newValue) => {
-    setDueDate(newValue);
-    setIsInvalidDate(false);
-  };
 
   const isInvoiceCreating = JSON.parse(localStorage.getItem("invoicecreating"));
-  React.useEffect(() => {
-    if (invoiceId) {
-      dispatch(setLoading(true));
-      dispatch({ type: GET_INVOICE, payload: invoiceId });
-    }
-  }, []);
-  React.useEffect(() => {
-    if (invoiceToUpdate && invoiceId) {
-      setShareInvoiceWith(invoiceToUpdate.shareInvoiceWithEmail);
-      setTasks(invoiceToUpdate.task_detail);
-      setTotalAmount(Number(invoiceToUpdate.invoicetotalvalue));
-      setInvoiceDate(invoiceToUpdate.invoicedate);
-      setIsInvalidDate && setDueDate(invoiceToUpdate.duedate);
-      setSelectedClient({
-        id: invoiceToUpdate?.client_detail?.id,
-        index: invoiceToUpdate?.client_detail?.id,
-        name: invoiceToUpdate?.client_detail?.name,
-        companyName: invoiceToUpdate?.client_detail?.companyname,
-      });
 
-      set_show_sender_bank_details(
-        invoiceToUpdate.show_sender_bank_details === "0" ? false : true
-      );
-      setCurrencyType(
-        invoiceToUpdate.currency_type + " " + invoiceToUpdate.currency_symbol
-      );
-      set_currency_symbol(invoiceToUpdate.currency_symbol);
+  React.useEffect(() => {
+    dispatch(setLoading(true));
+    dispatch({ type: GET_STUDENTS, dropdown: 1 });
+    dispatch({ type: GET_COURSES });
+  }, [dispatch]);
+
+  React.useEffect(() => {
+    dispatch(setLoading(true));
+    dispatch({
+      type: GET_COURSE_LIST,
+      payload: { course_duration: formData.selectedDuration },
+    });
+    dispatch({ type: GET_COURSE_FEE, payload: formData.selectedCourse });
+  }, [dispatch, formData.selectedDuration, formData.selectedCourse]);
+
+  const renderStudents = useMemo(
+    () =>
+      students.map((student, ind) => (
+        <MenuItem value={student.id} key={ind}>
+          {student?.name}
+        </MenuItem>
+      )),
+    [students]
+  );
+
+  const renderDuration = useMemo(() => {
+    const uniqueDurations = new Set();
+
+    courses.forEach((course) => {
+      if (course?.duration) {
+        uniqueDurations.add(course.duration);
+      }
+    });
+
+    return Array.from(uniqueDurations).map((duration, ind) => (
+      <MenuItem value={duration} key={ind}>
+        {duration}
+      </MenuItem>
+    ));
+  }, [courses]);
+
+  const renderCourse = useMemo(() => {
+    const courseId = courseDuration?.[0]?.course_id;
+    return (
+      courseId &&
+      courseDuration[0]?.course_name?.map((course, i) => (
+        <MenuItem value={courseId[i]} key={courseId[i]}>
+          {course}
+        </MenuItem>
+      ))
+    );
+  }, [courseDuration]);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if (
+      !formData.selectedStudent ||
+      !formData.selectedDuration ||
+      !formData.selectedCourse ||
+      !formData.selectedCourseFee ||
+      !formData.depositeAmount ||
+      !formData.paymentMethod
+    ) {
+      toast.error("Please fill all the required fields", {
+        toastId: "sender_form",
+      });
+      return;
     }
-  }, [invoiceToUpdate]);
+    const { selectedStudent, selectedCourse, depositeAmount, paymentMethod } =
+      formData;
+    const data = {
+      id: invoice_Id,
+      student_id: selectedStudent,
+      course_id: selectedCourse,
+      // deposited_amount: depositeAmount,
+      // payment_method: paymentMethod,
+    };
+    dispatch(setLoading(true));
+
+    const formDataPayload = new FormData();
+    formDataPayload.append("student_id", selectedStudent);
+    formDataPayload.append("course_id", selectedCourse);
+    formDataPayload.append("deposited_amount", depositeAmount);
+    formDataPayload.append("payment_method", paymentMethod);
+
+    if (invoice_Id) {
+      formDataPayload.append("id", invoice_Id);
+      dispatch({
+        type: UPDATE_INVOICE,
+        payload: data,
+      });
+      return;
+    }
+
+    dispatch({
+      type: ADD_INVOICE,
+      payload: formDataPayload,
+    });
+  };
 
   React.useEffect(() => {
     if (
@@ -126,219 +269,34 @@ export const CreateInvoice = () => {
     ) {
       navigate("/invoices");
     }
-  }, [invoiceCreating]);
+  }, [invoiceCreating, isInvoiceCreating, navigate]);
 
   React.useEffect(() => {
-    dispatch({ type: GET_CLIENTS, dropdown: 1 });
-  }, []);
-
-  const validateField = (fieldName, value) => {
-    if (fieldName === "studentname" && value === "") {
-      return "Student Name is required";
-    }
-    if (fieldName === "duration" && value === "") {
-      return "Duration is required";
-    }
-    return "";
-  };
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    console.log("name, value", name, value);
-    setSelectedValues({
-      ...selectedValues,
-      [name]: value,
-    });
-    setError({
-      ...error,
-      [name]: validateField(name, value),
-    });
-
-    // const sel_client = clients.find(
-    //   (client) => client.id === event.target.value
-    // );
-
-    // setSelectedClient({
-    //   id: sel_client.id,
-    //   name: sel_client.name,
-    //   index: event.target.value,
-    //   companyName: sel_client.companyname,
-    // });
-  };
-  console.log(clients, "884848448484848");
-  const renderClients = () => {
-    return clients.map((client, ind) => {
-      return (
-        <MenuItem value={client.id} key={ind}>
-          {client.name}
-        </MenuItem>
-      );
-    });
-  };
-
-  const handleInput = (event) => {
-    const re = /[0-9]+/g;
-    if (
-      event.target.name === "totalPrice" ||
-      event.target.name === "hourly_units_worked"
-    ) {
-      if (re.test(event.target.value)) {
-        setTaskInfo({ ...taskInfo, [event.target.name]: event.target.value });
-      } else {
-        if (!event.target.value) {
-          setTaskInfo({ ...taskInfo, [event.target.name]: event.target.value });
-        }
-        return;
+    const fetchViewInvoiceData = async () => {
+      try {
+        const invoiceData = await viewInvoice(invoice_Id);
+        setUpdated(invoiceData?.data?.data);
+      } catch (error) {
+        console.error("Error fetching invoice data", error);
       }
-    } else {
-      setTaskInfo({ ...taskInfo, [event.target.name]: event.target.value });
-    }
-  };
+    };
 
-  // const handleInputPrice = (event) => {
-  //   setTaskInfo({ ...taskInfo, [event.target.name]: event.target.value });
-  // };
+    fetchViewInvoiceData();
+  }, [invoice_Id]);
 
-  // const handleTaskType = (event) => {
-  //   setTaskInfo({ ...taskInfo, type: event.target.value, totalPrice: "" });
-  // };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-
-    // Validate all fields before submitting
-    const newFormErrors = {};
-    Object.keys(selectedValues).forEach((fieldName) => {
-      newFormErrors[fieldName] = validateField(
-        fieldName,
-        selectedValues[fieldName]
-      );
-    });
-
-    setError(newFormErrors);
-
-    if (Object.values(newFormErrors).every((error) => error === "")) {
-      // form submission logic goes here
-    }
-
-    // if (!shareInvoiceWith) {
-    //   toast.error("Please Enter Email");
-    //   return;
-    // }
-    // if (!isTaskToUpdate) {
-    //   let taskInfoCopy = { ...taskInfo };
-    //   if (taskInfo?.type === "hourly") {
-    //     taskInfoCopy.totalPrice =
-    //       Number(taskInfoCopy?.hourly_units_worked) *
-    //       Number(taskInfoCopy?.number_of_hours);
-    //   }
-    //   if (taskInfo?.type === "Fixed") {
-    //     taskInfoCopy.hourly_units_worked = "NA";
-    //     taskInfoCopy.number_of_hours = "NA";
-    //   }
-
-    //   setTasks([...tasks, taskInfoCopy]);
-    //   let amount = totalAmount;
-    //   amount += Number(taskInfoCopy.totalPrice);
-    //   setTotalAmount(amount);
-    // } else {
-    //   const all_tasks = [...tasks];
-    //   const taskToUpdate = all_tasks[indexOfTaskToUpdate];
-    //   taskInfo.totalPrice =
-    //     taskInfo.type == "hourly"
-    //       ? taskInfo.hourly_units_worked * taskInfo.number_of_hours
-    //       : taskInfo.totalPrice;
-    //   all_tasks[indexOfTaskToUpdate] = taskInfo;
-    //   if (taskInfo?.type === "Fixed") {
-    //     taskInfo.hourly_units_worked = "NA";
-    //     taskInfo.number_of_hours = "NA";
-    //   }
-
-    //   let amount = totalAmount;
-    //   amount += Number(taskInfo.totalPrice) - Number(taskToUpdate.totalPrice);
-    //   setTotalAmount(amount);
-    //   setIsTaskToUpdate(false);
-    //   setTasks(all_tasks);
-    // }
-    // setTaskInfo({
-    //   taskName: "",
-    //   number_of_hours: "",
-    //   hourly_units_worked: "",
-    //   totalPrice: "",
-    //   type: "",
-    // });
-  };
-
-  const editTask = (index) => {
-    const taskToUpdate = tasks[index];
-    setTaskInfo(taskToUpdate);
-    setIsTaskToUpdate(true);
-    setIndexOfTaskToUpdate(index);
-  };
-
-  const deleteTask = async (index) => {
-    const willDelete = await swal({
-      title: "Are you sure?",
-      text: "Are you sure that you want to delete this task?",
-      icon: "warning",
-      buttons: true,
-      dangerMode: true,
-    });
-    if (willDelete) {
-      setTaskInfo({
-        taskName: "",
-        number_of_hours: "",
-        hourly_units_worked: "",
-        totalPrice: "",
-        type: "",
-      });
-      setIsTaskToUpdate(false);
-    }
-    if (!willDelete) return;
-    const allTasks = [...tasks];
-    const taskToDelete = tasks[index];
-    const total_amount = Number(totalAmount) - Number(taskToDelete.totalPrice);
-    allTasks.splice(index, 1);
-    setTasks(allTasks);
-    setTotalAmount(total_amount);
-  };
-
-  const isValidEmail = (email) => {
-    return /\S+@\S+\.\S+/.test(email);
-  };
-
-  const handleCurrencyType = (event) => {
-    set_currency_symbol(event.target.value.slice(4));
-    setCurrencyType(event.target.value);
-  };
-
-  const handle_show_sender_bank_details = () => {
-    set_show_sender_bank_details(!show_sender_bank_details);
-  };
-
-  const handleEmail = (event) => {
-    if (event.target.value !== "" && !isValidEmail(event.target.value)) {
-      setError({ ...error, email: "Email is invalid" });
-    } else {
-      setError({ ...error, email: "" });
-    }
-
-    setShareInvoiceWith(event.target.value);
-  };
-  const preventMinus = (evt) => {
-    if (
-      (evt.which != 8 && evt.which != 0 && evt.which < 48) ||
-      evt.which > 57
-    ) {
-      evt.preventDefault();
-    }
-  };
   React.useEffect(() => {
-    if (dueDate) {
-      setIsInvalidDate("");
+    if (updated && invoice_Id) {
+      setFormData({
+        selectedStudent: JSON.parse(updated?.student_data)?.id || "",
+        selectedDuration: JSON.parse(updated?.course_data)?.duration || "",
+        selectedCourse: JSON.parse(updated?.course_data)?.id || "",
+        selectedCourseFee: JSON.parse(updated?.course_data)?.fee || "",
+        depositeAmount: updated?.deposited_amount || "",
+        pendingAmount: updated?.pending_amount || "",
+        paymentMethod: updated.payment_method || "",
+      });
     }
-  });
-
-  console.log(typeof dueDate, "dueDate");
+  }, [updated, invoice_Id]);
 
   return (
     <ProtectedRoute>
@@ -368,57 +326,56 @@ export const CreateInvoice = () => {
               }}
             >
               <Grid container spacing={1}>
-                {/* First column */}
                 <Grid item xs={6}>
                   <FormControl sx={{ width: "100%", marginTop: 2 }} required>
                     <InputLabel id="demo-simple-select-label">
                       Select Student
                     </InputLabel>
                     <Select
-                      name="studentname"
+                      name="selectedStudent"
                       labelId="selected_student"
                       id="selected_student"
-                      value={selectedValues.studentname}
+                      value={formData.selectedStudent}
                       label="selected_student"
                       onChange={handleChange}
                     >
-                      {/* {renderClients()} */}
-                      <MenuItem value="">Select an option</MenuItem>
-                      <MenuItem value={"IND ₹"}>IND</MenuItem>
-                      <MenuItem value={"USD $"}>USD</MenuItem>
+                      {loading ? (
+                        <MenuItem disabled>Loading...</MenuItem>
+                      ) : (
+                        renderStudents
+                      )}
                     </Select>
                   </FormControl>
-                  {error.studentname && (
+                  {error.selectedStudent && (
                     <Typography className="emailError">
-                      {error.studentname}
+                      {error.selectedStudent}
                     </Typography>
                   )}
                 </Grid>
 
-                {/* Second column */}
                 <Grid item xs={6}>
                   <FormControl sx={{ width: "100%", marginTop: 2 }} required>
                     <InputLabel id="demo-simple-select-label">
                       Course Duration
                     </InputLabel>
                     <Select
-                      name="duration"
+                      name="selectedDuration"
                       labelId="duration"
                       id="duration"
-                      value={selectedValues.duration}
+                      value={formData?.selectedDuration}
                       label="duration_type"
                       onChange={handleChange}
                     >
-                      <MenuItem value={"IND ₹"}>IND</MenuItem>
-                      <MenuItem value={"USD $"}>USD</MenuItem>
-                      <MenuItem value={"EUR €"}>EUR</MenuItem>
-                      <MenuItem value={"GBP R"}>GBP</MenuItem>
-                      <MenuItem value={"ZAR £"}>ZAR</MenuItem>
+                      {loading ? (
+                        <MenuItem disabled>Loading...</MenuItem>
+                      ) : (
+                        renderDuration
+                      )}
                     </Select>
                   </FormControl>
-                  {error.duration && (
+                  {error.selectedDuration && (
                     <Typography className="emailError">
-                      {error.duration}
+                      {error.selectedDuration}
                     </Typography>
                   )}
                 </Grid>
@@ -428,35 +385,30 @@ export const CreateInvoice = () => {
             <FormControl sx={{ width: "100%", marginTop: 2 }} required>
               <InputLabel id="demo-simple-select-label">Course</InputLabel>
               <Select
-                labelId="currency_type"
-                id="currency_type"
-                value={currencyType}
-                label="currency_type"
-                onChange={handleCurrencyType}
+                name="selectedCourse"
+                labelId="course_type"
+                id="course_type"
+                value={formData?.selectedCourse}
+                label="course_type"
+                onChange={handleChange}
               >
-                <MenuItem value={"IND ₹"}>IND</MenuItem>
-                <MenuItem value={"USD $"}>USD</MenuItem>
-                <MenuItem value={"EUR €"}>EUR</MenuItem>
-                <MenuItem value={"GBP R"}>GBP</MenuItem>
-                <MenuItem value={"ZAR £"}>ZAR</MenuItem>
+                {renderCourse}
               </Select>
             </FormControl>
             <FormControl sx={{ width: "100%", marginTop: 2 }} required>
               <InputLabel id="demo-simple-select-label">Course Fee</InputLabel>
               <Select
-                labelId="currency_type"
-                id="currency_type"
-                value={currencyType}
-                label="currency_type"
-                onChange={handleCurrencyType}
+                labelId="coursefee_type"
+                id="coursefee_type"
+                name="selectedCourseFee"
+                value={formData.selectedCourseFee}
+                label="coursefee_type"
+                onChange={handleChange}
               >
-                <MenuItem value={"IND ₹"}>IND</MenuItem>
-                <MenuItem value={"USD $"}>USD</MenuItem>
-                <MenuItem value={"EUR €"}>EUR</MenuItem>
-                <MenuItem value={"GBP R"}>GBP</MenuItem>
-                <MenuItem value={"ZAR £"}>ZAR</MenuItem>
+                <MenuItem value={Coursefee.fee}>{Coursefee.fee}</MenuItem>
               </Select>
-            </FormControl>
+            </FormControl>              {!invoice_Id && (
+
             <Grid container spacing={1}>
               <Grid item xs={6}>
                 <Box sx={{ width: "100%", marginTop: 2 }}>
@@ -465,15 +417,17 @@ export const CreateInvoice = () => {
                     fullWidth
                     type="number"
                     id="name"
-                    label="Deposite Amount"
-                    name="name"
+                    label="Deposit Amount"
+                    name="depositeAmount"
                     autoComplete="name"
                     inputProps={{ sx: { height: 10, marginTop: 1 } }}
-                    onChange={handleInput}
-                    // value={clientInfo.name}
+                    onChange={handleChange}
+                    value={formData.depositeAmount}
+                    disabled={invoice_Id ? true : false}
                   />
                 </Box>
               </Grid>
+
               <Grid item xs={6}>
                 <Box sx={{ width: "100%", marginTop: 2 }}>
                   <TextField
@@ -482,165 +436,63 @@ export const CreateInvoice = () => {
                     fullWidth
                     id="name"
                     label="Pending Amount"
-                    name="name"
+                    name="pendingAmount"
                     autoComplete="name"
+                    disabled={true}
                     inputProps={{ sx: { height: 10, marginTop: 1 } }}
-                    onChange={handleInput}
-                    // value={clientInfo.name}
+                    onChange={handleChange}
+                    value={formData.pendingAmount}
                   />
                 </Box>
               </Grid>
             </Grid>
-            <Box sx={{ width: "100%", marginTop: 2 }}>
-              <TextField
-                required
-                fullWidth
-                type="number"
-                id="name"
-                label="Payment Method"
-                name="name"
-                autoComplete="name"
-                inputProps={{ sx: { height: 10, marginTop: 1 } }}
-                onChange={handleInput}
-                // value={clientInfo.name}
-              />
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                width: "87%",
-                justifyContent: "space-between",
-              }}
-              mt={1}
-            >
-              <Typography sx={{ fontWeight: 500 }}>
-                Add Sender Bank Details on Invoice
-              </Typography>
-              <Checkbox
-                checked={show_sender_bank_details}
-                onChange={handle_show_sender_bank_details}
-                inputProps={{ "aria-label": "controlled" }}
-                sx={{ padding: 0 }}
-              />
-            </Box>
-            <Box className="task_form" component="form" onSubmit={handleSubmit}>
-              {/* <Typography
-                component="h1"
-                variant="h5"
-                sx={{ fontWeight: 600 }}
-                mt={1}
-              >
-                {isTaskToUpdate ? "Update Task " : "Add Task"}
-              </Typography>
-              <TextField
-                required
-                id="taskName"
-                label="Task Name"
-                name="taskName"
-                autoComplete="taskName"
-                sx={{ width: "87%", marginTop: 2 }}
-                inputProps={{ sx: { height: 15, marginTop: 1 } }}
-                onChange={handleInput}
-                value={taskInfo.taskName}
-              />
-              <FormControl sx={{ width: "87%", marginTop: 2 }}>
-                <InputLabel id="demo-simple-select-label">Task Type</InputLabel>
+              )}
+            {!invoice_Id && (
+              <FormControl sx={{ width: "100%", marginTop: 2 }} required>
+                <InputLabel id="demo-simple-select-label">
+                  Payment Method
+                </InputLabel>
                 <Select
-                  labelId="selected_client"
-                  id="selected_client"
-                  value={taskInfo.type}
-                  label="selected_client"
-                  onChange={handleTaskType}
+                  labelId="payment_type"
+                  id="payment_type"
+                  name="paymentMethod"
+                  value={formData.paymentMethod}
+                  label="payment_type"
+                  onChange={handleChange}
                 >
-                  <MenuItem value="Fixed">Fixed</MenuItem>
-                  <MenuItem value="hourly">Hourly</MenuItem>
+                  {paymentMethods.map((method) => (
+                    <MenuItem key={method} value={method}>
+                      {method}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
-
-              {taskInfo.type === "hourly" && (
-                <>
-                  <Box className="date_picker" mt={3}>
-                    <TextField
-                      required
-                      id="number_of_hours"
-                      label="Hours"
-                      type="number"
-                      onKeyPress={preventMinus}
-                      InputProps={{
-                        inputProps: { min: 0 },
-                      }}
-                      onWheel={(e) => e.target.blur()}
-                      name="number_of_hours"
-                      autoComplete="number_of_hours"
-                      sx={{ width: "90%", marginRight: 1 }}
-                      onChange={handleInput}
-                      value={taskInfo.number_of_hours}
-                    />
-
-                    <TextField
-                      required
-                      id="hourly_units_worked"
-                      label="Per Hour Price"
-                      type="number"
-                      onKeyPress={preventMinus}
-                      InputProps={{
-                        inputProps: { min: 0 },
-                      }}
-                      name="hourly_units_worked"
-                      autoComplete="hourly_units_worked"
-                      sx={{ width: "90%", marginLeft: 1 }}
-                      onChange={handleInput}
-                      onWheel={(e) => e.target.blur()}
-                      value={taskInfo.hourly_units_worked}
-                    />
-                  </Box>
-                </>
-              )}
-              <Box
-                sx={{
-                  width: "87%",
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
-              >
-                {taskInfo.type === "hourly" ? (
-                  <TextField
-                    required
-                    id="totalPrice"
-                    label="Total Price"
-                    name="totalPrice"
-                    autoComplete="totalPrice"
-                    sx={{ width: "100%", marginTop: 2 }}
-                    value={
-                      isNaN(
-                        taskInfo.hourly_units_worked * taskInfo.number_of_hours
-                      )
-                        ? 0
-                        : taskInfo.hourly_units_worked *
-                          taskInfo.number_of_hours
-                    }
-                    onChange={handleInputPrice}
-                  />
-                ) : (
-                  <TextField
-                    required
-                    id="totalPrice"
-                    label="Total Price"
-                    name="totalPrice"
-                    autoComplete="totalPrice"
-                    sx={{ width: "100%", marginTop: 2 }}
-                    onChange={handleInput}
-                    value={taskInfo.totalPrice}
-                  />
-                )}
-              </Box> */}
-              <Box mt={2} sx={{ width: "87%" }}>
+            )}
+            {formData.paymentMethod === "Other" && (
+              <FormControl sx={{ width: "100%", marginTop: 2 }} required>
+                <TextField
+                  required
+                  type="text"
+                  fullWidth
+                  id="otherPaymentMethod"
+                  label="Other Payment Method"
+                  name="otherPaymentMethod"
+                  autoComplete="otherPaymentMethod"
+                  inputProps={{ sx: { height: 10, marginTop: 1 } }}
+                  value={formData.otherPaymentMethod}
+                  onChange={handleChange}
+                />
+              </FormControl>
+            )}
+            <Box className="task_form" component="form" onSubmit={handleSubmit}>
+              <Box mt={2} sx={{ width: "100%" }}>
                 <Button
+                  fullWidth
                   type="submit"
                   sx={{ width: "100%", marginBottom: 1.5 }}
                   variant="contained"
                 >
-                  Add task
+                  {invoice_Id ? "Update Invoice" : "Create Invoice"}
                 </Button>
               </Box>
             </Box>

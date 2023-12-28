@@ -28,13 +28,15 @@ export default function Add_Sender_Company() {
   const dispatch = useDispatch();
   const [senderCompany, setSenderCompany] = React.useState({
     name: "",
-    location: "",
+    address: "",
     phone: "",
-    pan: "",
+    pan_number: "",
+    cin: "",
+    gstin: "",
     bank_name: "",
-    bank_account_holder_name: "",
-    bank_account_no: "",
-    bank_ifsc_code: "",
+    acc_holder: "",
+    acc_number: "",
+    ifsc: "",
     email: "",
   });
   const [isSenderExist, setIsSenderExist] = React.useState(false);
@@ -43,10 +45,8 @@ export default function Add_Sender_Company() {
 
   React.useEffect(() => {
     sender_company = JSON.parse(localStorage.getItem("sender"));
-    {
-      sender_company && setSenderCompany(sender_company);
-      setIsSenderExist(true);
-    }
+    sender_company && setSenderCompany(sender_company[0]);
+    setIsSenderExist(true);
   }, []);
 
   const handleSubmit = (event) => {
@@ -58,6 +58,19 @@ export default function Add_Sender_Company() {
     const data = new FormData(event.currentTarget);
     const payload = getsenderCompanyPayload(data);
     const isValidPayload = checkAllfieldsFilled(payload);
+    const updatePayload = {
+      name: senderCompany.name,
+      email: senderCompany.email,
+      address: senderCompany.address,
+      phone: senderCompany.phone,
+      cin: senderCompany.cin,
+      gstin: senderCompany.gstin,
+      pan_number: senderCompany.pan_number,
+      acc_number: senderCompany.acc_number,
+      acc_holder: senderCompany.acc_holder,
+      bank_name: senderCompany.bank_name,
+      ifsc: senderCompany.ifsc,
+    };
     if (!isValidPayload) {
       toast.error("Please fill all the fields", {
         toastId: "sender_form",
@@ -70,7 +83,7 @@ export default function Add_Sender_Company() {
       payload.id = sender_company.id;
       dispatch({
         type: UPDATE_SENDER_COMPANY,
-        payload,
+        payload: updatePayload,
       });
       return;
     }
@@ -84,6 +97,9 @@ export default function Add_Sender_Company() {
   function isValidEmail(email) {
     return /\S+@\S+\.\S+/.test(email);
   }
+  React.useEffect(() => {
+    dispatch({ type: GET_SENDER_COMPANY });
+  }, [dispatch]);
 
   const handleInput = (e) => {
     if (e.target.name === "email") {
@@ -125,7 +141,7 @@ export default function Add_Sender_Company() {
             }}
           >
             <Typography component="h1" variant="h5">
-              {isSenderExist ? "Update Company Info" : "Add Company Info"}
+              {sender_company ? "Update Company Info" : "Add Company Info"}
             </Typography>
             <Box
               component="form"
@@ -144,7 +160,7 @@ export default function Add_Sender_Company() {
                     autoComplete="companyName"
                     inputProps={{ sx: { height: 10, marginTop: 1 } }}
                     onChange={handleInput}
-                    value={senderCompany.name}
+                    value={senderCompany?.name}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -157,7 +173,7 @@ export default function Add_Sender_Company() {
                     autoComplete="email"
                     inputProps={{ sx: { height: 10, marginTop: 1 } }}
                     onChange={handleInput}
-                    value={senderCompany.email}
+                    value={senderCompany?.email}
                   />
                   <Typography className="errorStyle">{error.email}</Typography>
                 </Grid>
@@ -167,11 +183,11 @@ export default function Add_Sender_Company() {
                     fullWidth
                     id="address"
                     label="Address"
-                    name="location"
+                    name="address"
                     autoComplete="address"
                     inputProps={{ sx: { height: 10, marginTop: 1 } }}
                     onChange={handleInput}
-                    value={senderCompany.location}
+                    value={senderCompany?.address}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -185,7 +201,7 @@ export default function Add_Sender_Company() {
                     autoComplete="phone"
                     inputProps={{ sx: { height: 10, marginTop: 1 } }}
                     onChange={handleInput}
-                    value={senderCompany.phone}
+                    value={senderCompany?.phone}
                   />
                   <Typography className="errorStyle">{error.phone}</Typography>
                 </Grid>
@@ -195,12 +211,42 @@ export default function Add_Sender_Company() {
                     fullWidth
                     id="pan"
                     label="PAN NUMBER"
-                    name="pan"
+                    name="pan_number"
                     autoComplete="pan"
                     inputProps={{ sx: { height: 10, marginTop: 1 } }}
                     onChange={handleInput}
-                    value={senderCompany.pan}
+                    value={senderCompany?.pan_number}
                   />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    required
+                    fullWidth
+                    id="cin"
+                    label="Cin"
+                    type="number"
+                    name="cin"
+                    autoComplete="cin"
+                    inputProps={{ sx: { height: 10, marginTop: 1 } }}
+                    onChange={handleInput}
+                    value={senderCompany?.cin}
+                  />
+                  {/* <Typography className="errorStyle">{error.phone}</Typography> */}
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    required
+                    fullWidth
+                    id="gstin"
+                    label="Gstin"
+                    type="number"
+                    name="gstin"
+                    autoComplete="gstin"
+                    inputProps={{ sx: { height: 10, marginTop: 1 } }}
+                    onChange={handleInput}
+                    value={senderCompany?.gstin}
+                  />
+                  {/* <Typography className="errorStyle">{error.phone}</Typography> */}
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
@@ -208,11 +254,11 @@ export default function Add_Sender_Company() {
                     fullWidth
                     id="acc_no"
                     label="ACCOUNT NUMBER"
-                    name="bank_account_no"
-                    autoComplete="acc_no"
+                    name="acc_number"
+                    autoComplete="acc_number"
                     inputProps={{ sx: { height: 10, marginTop: 1 } }}
                     onChange={handleInput}
-                    value={senderCompany.bank_account_no}
+                    value={senderCompany?.acc_number}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -221,11 +267,11 @@ export default function Add_Sender_Company() {
                     fullWidth
                     id="accHolderName"
                     label="ACCOUNT HOLDER NAME"
-                    name="bank_account_holder_name"
-                    autoComplete="accHolderName"
+                    name="acc_holder"
+                    autoComplete="acc_holder"
                     inputProps={{ sx: { height: 10, marginTop: 1 } }}
                     onChange={handleInput}
-                    value={senderCompany.bank_account_holder_name}
+                    value={senderCompany?.acc_holder}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -238,7 +284,7 @@ export default function Add_Sender_Company() {
                     autoComplete="bankName"
                     inputProps={{ sx: { height: 10, marginTop: 1 } }}
                     onChange={handleInput}
-                    value={senderCompany.bank_name}
+                    value={senderCompany?.bank_name}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -247,11 +293,11 @@ export default function Add_Sender_Company() {
                     fullWidth
                     id="ifsc"
                     label="IFSC"
-                    name="bank_ifsc_code"
+                    name="ifsc"
                     autoComplete="ifsc"
                     inputProps={{ sx: { height: 10, marginTop: 1 } }}
                     onChange={handleInput}
-                    value={senderCompany.bank_ifsc_code}
+                    value={senderCompany?.ifsc}
                   />
                 </Grid>
               </Grid>

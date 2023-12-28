@@ -1,12 +1,15 @@
+
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   invoices: [],
   loading: false,
   invoiceCreating: false,
-  invoiceToUpdate: {},    
+  invoiceToUpdate: {},
   pdfUrl: "",
   totalInvoices: 0,
+  duration: [],
+  fee: ""
 };
 
 const invoices = createSlice({
@@ -54,6 +57,18 @@ const invoices = createSlice({
         pdfUrl: action?.payload,
       };
     },
+    setCourseDuration: (state, action) => {
+      return {
+        ...state,
+        duration: action?.payload,
+      };
+    },
+    setCourseFee: (state, action) => {
+      return {
+        ...state,
+        fee: action?.payload,
+      };
+    },
   },
 });
 
@@ -64,5 +79,7 @@ export const {
   invoiceCreating,
   setInvoiceToUpdate,
   setPDFUrl,
+  setCourseDuration,
+  setCourseFee,
 } = invoices.actions;
 export default invoices.reducer;

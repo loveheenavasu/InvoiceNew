@@ -4,7 +4,8 @@ import Button from "@mui/material/Button";
 import ProtectedRoute from "../../Routes/ProtectedRoute";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { clientCreating } from "../../Store/Slices/Clients";
+// import { clientCreating } from "../../Store/Slices/Clients";
+import { studentCreating } from "../../Store/Slices/Students";
 import { Navbar } from "../Navbar/Navbar";
 import { Footer } from "../Footer/Footer";
 import { RenderStudentsTable } from "./RenderStudentsTable";
@@ -15,8 +16,8 @@ export const Student = () => {
   localStorage.setItem("clientcreating", false);
 
   const addStudent = () => {
-    localStorage.setItem("clientcreating", true);
-    dispatch(clientCreating(true));
+    localStorage.setItem("studentcreating", true);
+    dispatch(studentCreating(true));
     navigate("/create_student");
   };
 
@@ -27,7 +28,7 @@ export const Student = () => {
         <Box className="client_table_upper">
           <Typography variant="h5">ALL STUDENTS</Typography>
           <Button sx={{ border: "1px solid" }} onClick={addStudent}>
-            Create Student
+            Add Student
           </Button>
         </Box>
         <Box mt={2}>{<RenderStudentsTable/>}</Box>

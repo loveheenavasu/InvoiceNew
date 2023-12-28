@@ -1,13 +1,13 @@
 import { AXIOS } from "./Setup";
 
 export const createSenderCompany = (action) => {
-  return AXIOS.post("add-sender-party", action?.payload);
+  return AXIOS.post("create-company", action?.payload);
 };
 
 export const fetchSenderCompany = () => {
-  return AXIOS.get("sender-party/1");
+  return AXIOS.get("view-company");
 };
 
 export const modifySenderCompany = (action) => {
-  return AXIOS.post("update-sender-party", action?.payload);
+  return AXIOS.post("create-company", action?.payload);
 };

@@ -12,47 +12,75 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import Tooltip from "@mui/material/Tooltip";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { Box } from "@mui/system";
 import { useDispatch, useSelector } from "react-redux";
 import {
   DELETE_INVOICE,
   DOWNLOAD_PDF,
-  GET_CLIENTS,
+  GET_COURSES,
   GET_INVOICES,
-  MARK_PAYMENT_DONE,
+  GET_STUDENTS,
 } from "../../Store/Action_Constants";
 import Spinner from "../Spinner/Spinner";
 import { invoiceCreating, setLoading } from "../../Store/Slices/Invoice";
 
 import swal from "sweetalert";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import PaymentModal from "../Modal/PaymentModal";
+import PaymentList from "../Modal/PaymentList";
 
 const columns = [
   { id: "Invoice_Number", label: "Invoice Number ", minWidth: 100 },
-  { id: "Client_Name", label: "Student Name ", minWidth: 100 },
-  { id: "Due_Date", label: "Course Duration", minWidth: 100 },
-  { id: "Submitted_Date", label: "Course", minWidth: 100 },
-  { id: "Submitted_Date", label: "Course Fee", minWidth: 100 },
-  { id: "Submitted_Date", label: "Deposite Amount", minWidth: 100 },
-  { id: "Submitted_Date", label: "Pending Amount", minWidth: 100 },
+  { id: "Student_Name", label: "Student Name ", minWidth: 100 },
+  { id: "Duration", label: "Course Duration", minWidth: 100 },
+  { id: "Course_data", label: "Course Name", minWidth: 100 },
+  { id: "Fee_data", label: "Course Fee", minWidth: 100 },
+  { id: "Deposited_amount", label: "Deposit Amount", minWidth: 100 },
+  { id: "Pending_amount", label: "Pending Amount", minWidth: 100 },
+  // { id: "Payment_method", label: "Payment Method", minWidth: 100 },
   { id: "actions", label: "ACTIONS", minWidth: 100 },
 ];
 export const RenderInvoiceTable = () => {
   const _data = useSelector((state) => state.invoices);
-
-  const { loading, invoices, invoiceToUpdate, totalInvoices } = _data || {};
-  const { clients } = useSelector((state) => state.clients);
+  const { loading, invoices, totalInvoices } = _data || {};
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [page, setPage] = React.useState(1);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [invoicesData, setInvoicesData] = React.useState([]);
+
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [isDepositedModalOpen, setDepositedModalOpen] = React.useState(false);
+  const [invoiceId, setSelectedInvoiceId] = React.useState("");
+  const [selectedInvoice, setSelectedInvoice] = React.useState("");
+
+  const handleLinkClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleDepositedModalOpen = () => {
+    setDepositedModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
+  const handleDepositedModalClose = () => {
+    setDepositedModalOpen(false);
+    setSelectedInvoiceId(null)
+  };
+
+  const handlePayment = () => {
+    handleModalClose();
+  };
+
   React.useEffect(() => {
     dispatch(setLoading(true));
     dispatch({ type: GET_INVOICES });
-    dispatch({ type: GET_CLIENTS });
-  }, []);
+    dispatch({ type: GET_STUDENTS });
+    dispatch({ type: GET_COURSES });
+  }, [dispatch]);
+
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(+event.target.value);
     setPage(1);
@@ -61,7 +89,7 @@ export const RenderInvoiceTable = () => {
   React.useEffect(() => {
     dispatch(setLoading(true));
     dispatch({ type: GET_INVOICES, payload: { page: page, row: rowsPerPage } });
-  }, [page, rowsPerPage]);
+  }, [dispatch, page, rowsPerPage]);
 
   const handleChangePage = (event, newPage) => {
     setPage(++newPage);
@@ -86,8 +114,7 @@ export const RenderInvoiceTable = () => {
     dispatch(setLoading(true));
     dispatch({ type: DELETE_INVOICE, payload: payload });
   };
-
-  const editInvoice = (index) => {
+  const editInvoice = (index, row) => {
     localStorage.setItem("invoicecreating", true);
     const invoice_id = invoices[index].id;
     dispatch(invoiceCreating(true));
@@ -105,42 +132,20 @@ export const RenderInvoiceTable = () => {
   };
   React.useEffect(() => {
     const _invoices = invoices?.map((invoice, ind) => {
-      const paidOn = invoice?.paid_on?.split(" ");
-
       return {
         Invoice_Number: invoice.id || "-",
-        Client_Name: invoice?.client_detail?.name || "-",
-        Due_Date: invoice.duedate || "-",
-        Submitted_Date: invoice.invoicedate || "-",
-        Total_Amount: invoice.invoicetotalvalue || "-",
-        payment_status: invoice?.payment_status || "-",
-        Paid_On: paidOn?.length > 0 ? paidOn[0] : "- ",
+        Student_Name: JSON.parse(invoice?.student_data)?.name || "-",
+        Duration: JSON.parse(invoice?.course_data)?.duration || "-",
+        Course_data: JSON.parse(invoice?.course_data)?.name || "-",
+        Fee_data: JSON.parse(invoice.course_data)?.fee || "-",
+        Deposited_amount: invoice?.amount || "-",
+        Pending_amount: invoice?.pending_amount || "- ",
+        Payment_method: invoice.payment_method || "_",
         actions: "",
-        currencyType: invoice.currency_type,
       };
     });
     setInvoicesData(_invoices);
   }, [invoices]);
-
-  const handlePaymentStatus = async (index) => {
-    const invoice_id = invoices[index].id;
-    const willUpdatePaymentStatus = await swal({
-      title: "Are you sure?",
-      text: "Are you sure that you want to mark the payment status done?",
-      icon: "warning",
-      buttons: true,
-      dangerMode: true,
-    });
-    if (!willUpdatePaymentStatus) return;
-
-    dispatch(setLoading(true));
-    const payload = {
-      invoiceId: invoice_id,
-      page: page,
-      row: rowsPerPage,
-    };
-    dispatch({ type: MARK_PAYMENT_DONE, payload: payload });
-  };
 
   return (
     <Paper sx={{ width: "100%", overflow: "hidden" }}>
@@ -164,10 +169,14 @@ export const RenderInvoiceTable = () => {
             {invoicesData?.length > 0 ? (
               invoicesData?.map((row, index) => {
                 return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
+                  <TableRow
+                    hover
+                    role="checkbox"
+                    tabIndex={-1}
+                    key={row.Invoice_Number}
+                  >
                     {columns.map((column) => {
                       let value = row[column.id];
-
                       return (
                         <TableCell key={column.id} align={column.align}>
                           {column.id === "actions" ? (
@@ -175,7 +184,7 @@ export const RenderInvoiceTable = () => {
                               <Tooltip title="Update Invoice">
                                 <EditIcon
                                   className="cursor_pointer"
-                                  onClick={() => editInvoice(index)}
+                                  onClick={() => editInvoice(index, row)}
                                 />
                               </Tooltip>
                               &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
@@ -200,22 +209,56 @@ export const RenderInvoiceTable = () => {
                                 />
                               </Tooltip>
                             </Box>
-                          ) : column.id === "payment_status" ? (
+                          ) : column.id === "Fee_data" ? (
                             <Box
                               sx={{
                                 display: "flex",
-                                color: value === "paid" ? "green" : "orange",
                               }}
                             >
-                              {value}&nbsp;&nbsp;&nbsp;
-                              {value !== "paid" && (
-                                <Tooltip title="Mark Payment Done">
-                                  <CheckCircleOutlineIcon
-                                    sx={{ color: "orange" }}
-                                    className="cursor_pointer"
-                                    onClick={() => handlePaymentStatus(index)}
-                                  />
-                                </Tooltip>
+                              <>
+                                <span style={{ marginRight: "4px" }}>Rs</span>{" "}
+                                {value}
+                              </>
+                            </Box>
+                          ) : column.id === "Deposited_amount" ? (
+                            <Box
+                              sx={{
+                                display: "flex",
+                              }}
+                            >
+                              <span style={{ marginRight: "4px" }}>Rs</span>
+                              <Link
+                                onClick={() => {
+                                  setSelectedInvoiceId(row);
+                                  handleDepositedModalOpen();
+                                }}
+                              >
+                              {value}
+                              </Link>
+                            </Box>
+                          ) : column.id === "Pending_amount" ? (
+                            <Box
+                              sx={{
+                                display: "flex",
+                              }}
+                            >
+                              {value &&
+                              !isNaN(value) &&
+                              String(value).trim() !== "0" ? (
+                                <>
+                                  <span style={{ marginRight: "4px" }}>Rs</span>{" "}
+                                  <Link
+                                    style={{ color: "red" }}
+                                    onClick={() => {
+                                      handleLinkClick();
+                                      setSelectedInvoice(row);
+                                    }}
+                                  >
+                                    {value}
+                                  </Link>
+                                </>
+                              ) : (
+                                "0"
                               )}
                             </Box>
                           ) : column.id === "Total_Amount" ? (
@@ -235,13 +278,24 @@ export const RenderInvoiceTable = () => {
             ) : (
               <TableRow>No Data is available</TableRow>
             )}
+            {isDepositedModalOpen && <PaymentList
+              isDepositedModalOpen={isDepositedModalOpen}
+              onClose={handleDepositedModalClose}
+              invoiceData={invoiceId}
+            />}
+            <PaymentModal
+              isOpen={isModalOpen}
+              onClose={handleModalClose}
+              onPayment={handlePayment}
+              invoiceData={selectedInvoice}
+            />
           </TableBody>
         </Table>
       </TableContainer>
       <TablePagination
         rowsPerPageOptions={[10, 25, 100]}
         component="div"
-        count={totalInvoices}
+        count={totalInvoices || 0}
         rowsPerPage={rowsPerPage}
         page={page - 1}
         onPageChange={handleChangePage}

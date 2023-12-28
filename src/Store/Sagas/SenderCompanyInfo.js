@@ -16,7 +16,7 @@ import {
 function* saveSenderCompany(action) {
   try {
     const response = yield call(createSenderCompany, action);
-    if (response?.data.success) yield put(_saveSenderCompany(action?.payload));
+    if (response?.data) yield put(_saveSenderCompany(action?.payload));
   } catch (e) {
     toast.error(e?.response?.data?.error?.[0] || e?.response?.data?.message);
     yield put(setLoading(false));
@@ -37,7 +37,7 @@ function* updateSenderCompany(action) {
   try {
     const response = yield call(modifySenderCompany, action);
     toast.success("Company info has been updated successfully");
-    if (response?.data.success) yield put(_saveSenderCompany(action?.payload));
+    if (response?.data) yield put(_saveSenderCompany(action?.payload));
   } catch (e) {
     toast.error(e?.response?.data?.error?.[0] || e?.response?.data?.message);
     yield put(setLoading(false));

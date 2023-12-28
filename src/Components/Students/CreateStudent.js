@@ -3,17 +3,15 @@ import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
-
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import ProtectedRoute from "../../Routes/ProtectedRoute";
-// import { getClientPayload } from "../../CommonComponents/clientPayload";
 import { getStudentPayload } from "../../CommonComponents/studentPayload";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
-import { setLoading } from "../../Store/Slices/Clients";
+import { setLoading } from "../../Store/Slices/Students";
 import {
   GET_STUDENT,
   SAVE_STUDENT,
@@ -23,13 +21,13 @@ import Spinner from "../Spinner/Spinner";
 import { useNavigate, useParams } from "react-router-dom";
 import { Navbar } from "../Navbar/Navbar";
 import { Footer } from "../Footer/Footer";
-import TextareaAutosize from "@mui/base/TextareaAutosize";
 const theme = createTheme();
+
 
 export default function CreateStudent() {
   const dispatch = useDispatch();
   const { id } = useParams();
-  const { loading, studentCreating, students, student } = useSelector(
+  const { loading, studentCreating, student } = useSelector(
     (state) => state.Students
   );
   const navigate = useNavigate();
@@ -40,16 +38,14 @@ export default function CreateStudent() {
     phone: "",
     address: "",
   });
-  const [error, setError] = React.useState({ name: "", email: "", phone: "" });
 
+  const [error, setError] = React.useState({ name: "", email: "", phone: "", address:"" });
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const payload = getStudentPayload(data);
-    console.log("student payload", payload);
 
-    console.log(error, "error");
-    if (!payload.name || !payload.email || !payload.phone) {
+    if (!payload.name || !payload.email || !payload.phone || !payload.address) {
       toast.error("Please fill all the required fields", {
         toastId: "sender_form",
       });
@@ -70,14 +66,15 @@ export default function CreateStudent() {
     dispatch(setLoading(true));
 
     if (id) {
+
       payload.id = studentInfo.id;
       dispatch({
         type: UPDATE_STUDENT,
-        payload: payload,
+        payload: studentInfo,
       });
       return;
     }
-
+    
     dispatch({
       type: SAVE_STUDENT,
       payload: payload,
@@ -86,14 +83,14 @@ export default function CreateStudent() {
 
   React.useEffect(() => {
     if (id) setStudentInfo(student);
-  }, [student]);
+  }, [id, student]);
 
   React.useEffect(() => {
     if (id) {
       dispatch(setLoading(true));
       dispatch({ type: GET_STUDENT, payload: id });
     }
-  }, []);
+  }, [dispatch, id]);
 
   React.useEffect(() => {
     if (
@@ -102,19 +99,16 @@ export default function CreateStudent() {
     ) {
       navigate("/student");
     }
-  }, [studentCreating]);
+  }, [isStudentCreating, navigate, studentCreating]);
 
   const isValidEmail = (email) => {
     return /\S+@\S+\.\S+/.test(email);
   };
-  const isValidName = (name) => {
-    return /^[A-Za-z]+$/.test(name);
-  };
+ 
   const handleInput = (e) => {
-    console.log("heellllo", e.target.value);
     if (e.target.name === "name") {
-      if (e.target.value !== "" && !isValidName(e.target.value)) {
-        setError({ ...error, email: "Name is invalid" });
+      if (e.target.value === "" ) {
+        setError({ ...error, name: "Name is required" });
       } else {
         setError({ ...error, name: "" });
       }
@@ -140,6 +134,19 @@ export default function CreateStudent() {
         setError({ ...error, phone: "" });
       }
     }
+    if (e.target.name === "address") {
+      if (
+        e.target.value === "" ) {
+        setError({
+          ...error,
+          address: "Address is required",
+        });
+      } else {
+        setError({ ...error, address: "" });
+      }
+    }
+
+      
     setStudentInfo({ ...studentInfo, [e.target.name]: e.target.value });
   };
 
@@ -166,6 +173,7 @@ export default function CreateStudent() {
               noValidate
               onSubmit={handleSubmit}
               sx={{ mt: 3 }}
+
             >
               <Grid container spacing={2}>
                 <Grid item xs={12}>
@@ -180,7 +188,7 @@ export default function CreateStudent() {
                     onChange={handleInput}
                     value={studentInfo.name}
                   />
-                  <Typography className="emailError">{error.name}</Typography>
+                {error.name && <Typography className="emailError">{error.name}</Typography>}
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
@@ -194,7 +202,7 @@ export default function CreateStudent() {
                     onChange={handleInput}
                     value={studentInfo.email}
                   />
-                  <Typography className="emailError">{error.email}</Typography>
+                {error.email &&  <Typography className="emailError">{error.email}</Typography>}
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
@@ -213,6 +221,7 @@ export default function CreateStudent() {
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
+                  required
                     fullWidth
                     id="address"
                     label="Address"
@@ -222,6 +231,8 @@ export default function CreateStudent() {
                     onChange={handleInput}
                     value={studentInfo.address}
                   />
+                  <Typography className="emailError">{error.address}</Typography>
+
                 </Grid>
               </Grid>
               <Box mt={3}>

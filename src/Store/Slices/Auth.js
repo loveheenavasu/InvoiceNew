@@ -13,7 +13,6 @@ const auth = createSlice({
   reducers: {
     handleUserLogin: (state, action) => {
       const { data } = action?.payload;
-      // console.log(4949494949,  data.token  ,"4949494949")
       if (data.token) {
         return {
           ...state,

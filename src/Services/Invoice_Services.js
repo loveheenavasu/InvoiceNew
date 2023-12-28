@@ -18,11 +18,13 @@ export const removeInvoice = (action) => {
 };
 
 export const fetchInvoice = (action) => {
-  return AXIOS.get(`get-invoice/${action}`);
+  return AXIOS.get(`view-invoice/${action}`);
 };
 
 export const editInvoice = (action) => {
-  return AXIOS.put("update-invoice", action?.payload);
+const id =action.payload.id
+ delete action.payload.id
+  return AXIOS.put(`update-invoice/${id}`, action?.payload);
 };
 
 export const viewInvoice = (action) => {
@@ -30,9 +32,27 @@ export const viewInvoice = (action) => {
 };
 
 export const _downloadPdf = (action) => {
-  return AXIOS.get(`generate-pdf/${action}`);
+  return AXIOS.get(`download-invoice/${action}`);
 };
 
 export const mark_payment_done = (action) => {
   return AXIOS.put(`update-payment-status/${action}`);
 };
+
+export const get_course_fee = (action)=>{
+  const data ={course_id:action.payload}
+  return AXIOS.post('course-fee', data)
+}
+export const get_course_list = (action)=>{
+  return AXIOS.post('course-list', action.payload)
+}
+
+export const pending_amount = (action) => {
+  return AXIOS.post("pay-pending", action.payload );
+};
+export const payment_list = (action)=>{
+  return AXIOS.post(`list-amount`, action.payload)
+}
+export const update_payment = (action)=>{
+  return AXIOS.put("update-amount" , action.payload)
+}

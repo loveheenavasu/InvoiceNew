@@ -14,7 +14,6 @@ import { _saveCourses, _saveCourse, setLoading,courseCreated } from "../Slices/C
   
   function* getCourses(action) {
     try {
-      console.log(action, "hfhfhhaction");
       const response = yield call(fetchCourses, action);
       yield put(_saveCourses(response?.data));
     } catch (e) {
@@ -44,6 +43,8 @@ import { _saveCourses, _saveCourse, setLoading,courseCreated } from "../Slices/C
             rows: action?.payload.row,
           },
         });
+        toast.success("course has been successfully deleted");
+
       }
     } catch (e) {
       toast.error(e?.response?.data?.error?.[0] || e?.response?.data?.message);

@@ -16,13 +16,11 @@ import { setLoading } from "../../Store/Slices/Auth";
 import { GET_SENDER_COMPANY, LOGIN_USER } from "../../Store/Action_Constants";
 import Spinner from "../Spinner/Spinner";
 import { useNavigate } from "react-router-dom";
-import useAuth from "../../Hooks/useAuth";
 
 const theme = createTheme();
 
 export default function LoginPage() {
   const { user, token, loading, success } = useSelector((state) => state.auth);
-  console.log(success,"success")
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -33,7 +31,7 @@ export default function LoginPage() {
       dispatch({ type: GET_SENDER_COMPANY });
       navigate("/invoices");
     }
-  }, [success, user]);
+  }, [dispatch, navigate, success, token, user]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -58,7 +56,6 @@ export default function LoginPage() {
     });
 
   };
-  console.log(loading,"8484848484848")
   return (
     <>
       <Spinner loading={loading} />
