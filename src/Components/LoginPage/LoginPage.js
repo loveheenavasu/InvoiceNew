@@ -21,6 +21,9 @@ const theme = createTheme();
 
 export default function LoginPage() {
   const { user, token, loading, success } = useSelector((state) => state.auth);
+  const data = useSelector((state) => state.auth);
+
+  console.log("rethryt",data)
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -29,7 +32,7 @@ export default function LoginPage() {
     if (token) {
       localStorage.setItem("token", "Bearer " + token);
       dispatch({ type: GET_SENDER_COMPANY });
-      navigate("/invoices");
+      navigate("/student");
     }
   }, [dispatch, navigate, success, token, user]);
 

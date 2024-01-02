@@ -36,7 +36,14 @@ import { _saveCourses, _saveCourse, setLoading,courseCreated } from "../Slices/C
     try {
       const response = yield call(removeCourse, action?.payload.courseId);
       if (response.status === 200) {
-        store.dispatch({
+        // store.dispatch({
+        //   type: GET_COURSES,
+        //   payload: {
+        //     page: action?.payload.page,
+        //     rows: action?.payload.row,
+        //   },
+        // });
+        yield put({
           type: GET_COURSES,
           payload: {
             page: action?.payload.page,
@@ -71,7 +78,10 @@ import { _saveCourses, _saveCourse, setLoading,courseCreated } from "../Slices/C
       if (response.status === 200) {
         yield put(courseCreated());
         toast.success("course has been updated successfully");
-        store.dispatch({
+        // store.dispatch({
+        //   type: GET_COURSES,
+        // });
+        yield put({
           type: GET_COURSES,
         });
       }

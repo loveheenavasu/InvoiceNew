@@ -37,6 +37,7 @@ import {
 } from "../Slices/Invoice";
 import { store } from "../Store";
 import { setPaymentList, setUpdateList } from "../Slices/Payment";
+
 function* addInvoice(action) {
   try {
     const response = yield call(createInvoice, action);
@@ -84,7 +85,7 @@ function* getInvoice(action) {
     const response = yield call(fetchInvoice, action?.payload);
     yield put(setInvoiceToUpdate(response?.data?.data));
   } catch (e) {
-    toast.error(e?.response?.data?.error?.[0] || e?.response?.data?.message);
+    toast.error(e?.response?.data?.error || e?.response?.data?.message);
     yield put(setLoading(false));
   }
 }
@@ -109,9 +110,10 @@ function* downloadPdf(action) {
     const response = yield call(_downloadPdf, action?.payload);
     window.open(response?.data?.url);
     yield put(setPDFUrl(response?.data?.url));
-    yield put(setLoading(false));
+
+      yield put(setLoading(false));
   } catch (e) {
-    toast.error(e?.response?.error?.[0] || e?.response?.message);
+    toast.error(e?.response?.error || e?.response?.message);
     yield put(setLoading(false));
   }
 }
@@ -129,9 +131,9 @@ function* getCourseFee(action) {
 }
 function* getCourselist(action) {
   try {
-    const response = yield call(get_course_list, action);
+    const response = yield call(get_course_list);
     if (response.status === 200) {
-      yield put(setCourseDuration(response.data));
+      yield put(setCourseDuration(response.data.data));
     }
   } catch (e) {
     toast.error(e?.response?.data?.error?.[0] || e?.response?.data?.message);

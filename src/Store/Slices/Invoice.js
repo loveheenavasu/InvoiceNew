@@ -20,7 +20,7 @@ const invoices = createSlice({
       return {
         ...state,
         invoices: action?.payload?.data,
-        totalInvoices: action.payload.total_invoice_record,
+        totalInvoices: action.payload.total,
         loading: false,
       };
     },

@@ -16,7 +16,7 @@ const students = createSlice({
       return {
         ...state,
         students: action?.payload?.data,
-        totalStudents: action?.payload?.total_student_record || 0,
+        totalStudents: action?.payload?.total || 0,
         loading: false,
       };
     },

@@ -12,13 +12,13 @@ const auth = createSlice({
   initialState,
   reducers: {
     handleUserLogin: (state, action) => {
-      const { data } = action?.payload;
-      if (data.token) {
+      const { data, token } = action?.payload;
+      if (token) {
         return {
           ...state,
           user: data,
-          token:data.token,
-          success:data.token?true:false,
+          token:token,
+          success:token?true:false,
           loading: false,
         };
       }

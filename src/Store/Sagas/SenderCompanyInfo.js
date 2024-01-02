@@ -18,7 +18,7 @@ function* saveSenderCompany(action) {
     const response = yield call(createSenderCompany, action);
     if (response?.data) yield put(_saveSenderCompany(action?.payload));
   } catch (e) {
-    toast.error(e?.response?.data?.error?.[0] || e?.response?.data?.message);
+    toast.error(e?.response?.data?.error || e?.response?.data?.message);
     yield put(setLoading(false));
   }
 }
@@ -28,7 +28,7 @@ function* getSenderCompany(action) {
     const response = yield call(fetchSenderCompany);
     yield put(_saveSenderCompany(response?.data?.data));
   } catch (e) {
-    toast.error(e?.response?.data?.error?.[0] || e?.response?.data?.message);
+    toast.error(e?.response?.data?.error || e?.response?.data?.message);
     yield put(setLoading(false));
   }
 }
@@ -39,7 +39,7 @@ function* updateSenderCompany(action) {
     toast.success("Company info has been updated successfully");
     if (response?.data) yield put(_saveSenderCompany(action?.payload));
   } catch (e) {
-    toast.error(e?.response?.data?.error?.[0] || e?.response?.data?.message);
+    toast.error(e?.response?.data?.error || e?.response?.data?.message);
     yield put(setLoading(false));
   }
 }

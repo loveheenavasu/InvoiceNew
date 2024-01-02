@@ -86,13 +86,13 @@ export const Navbar = () => {
             >
               Students
             </Button>
-            <Button
+            {/* <Button
               color="inherit"
               className="buttonFontSize"
               onClick={() => navigate("/invoices")}
             >
               Invoice
-            </Button>
+            </Button> */}
             <Button
               color="inherit"
               onClick={handleClick}

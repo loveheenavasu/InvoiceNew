@@ -79,7 +79,6 @@ export const CreateInvoice = () => {
         try {
           dispatch({
             type: GET_COURSE_LIST,
-            payload: { course_duration: value },
           });
         } catch (error) {
           console.error("Error dispatching action for course list:", error);
@@ -97,15 +96,15 @@ export const CreateInvoice = () => {
           [name]: value,
         }));
 
-        try {
-          dispatch(setLoading(true));
-          dispatch({
-            type: GET_COURSE_FEE,
-            payload: value,
-          });
-        } catch (error) {
-          console.error("Error dispatching action for course fee:", error);
-        }
+        // try {
+        //   dispatch(setLoading(true));
+        //   dispatch({
+        //     type: GET_COURSE_FEE,
+        //     payload: value,
+        //   });
+        // } catch (error) {
+        //   console.error("Error dispatching action for course fee:", error);
+        // }
       }
     } else if (name === "paymentMethod" && value === "Other") {
       setFormData((prevFormData) => ({
@@ -168,14 +167,14 @@ export const CreateInvoice = () => {
     dispatch({ type: GET_COURSES });
   }, [dispatch]);
 
-  React.useEffect(() => {
-    dispatch(setLoading(true));
-    dispatch({
-      type: GET_COURSE_LIST,
-      payload: { course_duration: formData.selectedDuration },
-    });
-    dispatch({ type: GET_COURSE_FEE, payload: formData.selectedCourse });
-  }, [dispatch, formData.selectedDuration, formData.selectedCourse]);
+  // React.useEffect(() => {
+  //   dispatch(setLoading(true));
+  //   dispatch({
+  //     type: GET_COURSE_LIST,
+  //     payload: { course_duration: formData.selectedDuration },
+  //   });
+  //   dispatch({ type: GET_COURSE_FEE, payload: formData.selectedCourse });
+  // }, [dispatch, formData.selectedDuration, formData.selectedCourse]);
 
   // const renderStudents = useMemo(
   //   () =>
@@ -350,7 +349,7 @@ export const CreateInvoice = () => {
                       )}
                     </Select>
                   </FormControl> */}
-                    <FormControl sx={{ width: "100%", marginTop: 2 }} required>
+                  <FormControl sx={{ width: "100%", marginTop: 2 }} required>
                     <Autocomplete
                       id="selected_student"
                       options={renderStudents}
@@ -410,7 +409,6 @@ export const CreateInvoice = () => {
                 </Grid>
               </Grid>
             </Box>
-
             <FormControl sx={{ width: "100%", marginTop: 2 }} required>
               <InputLabel id="demo-simple-select-label">Course</InputLabel>
               <Select
@@ -424,6 +422,7 @@ export const CreateInvoice = () => {
                 {renderCourse}
               </Select>
             </FormControl>
+
             <FormControl sx={{ width: "100%", marginTop: 2 }} required>
               <InputLabel id="demo-simple-select-label">Course Fee</InputLabel>
               <Select
@@ -436,46 +435,61 @@ export const CreateInvoice = () => {
               >
                 <MenuItem value={Coursefee.fee}>{Coursefee.fee}</MenuItem>
               </Select>
-            </FormControl>              {!invoice_Id && (
+            </FormControl>
+            <Box sx={{ width: "100%", marginTop: 2 }}>
+              <TextField
+                required
+                fullWidth
+                type="number"
+                id="name"
+                label="Discount"
+                name="depositeAmount"
+                autoComplete="name"
+                inputProps={{ sx: { height: 10, marginTop: 1 } }}
+                // onChange={handleChange}
+                // value={formData.depositeAmount}
+                // disabled={invoice_Id ? true : false}
+              />
+            </Box>
+            {!invoice_Id && (
+              <Grid container spacing={1}>
+                <Grid item xs={6}>
+                  <Box sx={{ width: "100%", marginTop: 2 }}>
+                    <TextField
+                      required
+                      fullWidth
+                      type="number"
+                      id="name"
+                      label="Deposit Amount"
+                      name="depositeAmount"
+                      autoComplete="name"
+                      inputProps={{ sx: { height: 10, marginTop: 1 } }}
+                      onChange={handleChange}
+                      value={formData.depositeAmount}
+                      disabled={invoice_Id ? true : false}
+                    />
+                  </Box>
+                </Grid>
 
-            <Grid container spacing={1}>
-              <Grid item xs={6}>
-                <Box sx={{ width: "100%", marginTop: 2 }}>
-                  <TextField
-                    required
-                    fullWidth
-                    type="number"
-                    id="name"
-                    label="Deposit Amount"
-                    name="depositeAmount"
-                    autoComplete="name"
-                    inputProps={{ sx: { height: 10, marginTop: 1 } }}
-                    onChange={handleChange}
-                    value={formData.depositeAmount}
-                    disabled={invoice_Id ? true : false}
-                  />
-                </Box>
+                <Grid item xs={6}>
+                  <Box sx={{ width: "100%", marginTop: 2 }}>
+                    <TextField
+                      required
+                      type="number"
+                      fullWidth
+                      id="name"
+                      label="Pending Amount"
+                      name="pendingAmount"
+                      autoComplete="name"
+                      disabled={true}
+                      inputProps={{ sx: { height: 10, marginTop: 1 } }}
+                      onChange={handleChange}
+                      value={formData.pendingAmount}
+                    />
+                  </Box>
+                </Grid>
               </Grid>
-
-              <Grid item xs={6}>
-                <Box sx={{ width: "100%", marginTop: 2 }}>
-                  <TextField
-                    required
-                    type="number"
-                    fullWidth
-                    id="name"
-                    label="Pending Amount"
-                    name="pendingAmount"
-                    autoComplete="name"
-                    disabled={true}
-                    inputProps={{ sx: { height: 10, marginTop: 1 } }}
-                    onChange={handleChange}
-                    value={formData.pendingAmount}
-                  />
-                </Box>
-              </Grid>
-            </Grid>
-              )}
+            )}
             {!invoice_Id && (
               <FormControl sx={{ width: "100%", marginTop: 2 }} required>
                 <InputLabel id="demo-simple-select-label">

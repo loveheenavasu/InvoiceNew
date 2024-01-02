@@ -17,9 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   DELETE_INVOICE,
   DOWNLOAD_PDF,
-  GET_COURSES,
   GET_INVOICES,
-  GET_STUDENTS,
 } from "../../Store/Action_Constants";
 import Spinner from "../Spinner/Spinner";
 import { invoiceCreating, setLoading } from "../../Store/Slices/Invoice";
@@ -34,9 +32,9 @@ const columns = [
   { id: "Student_Name", label: "Student Name ", minWidth: 100 },
   { id: "Duration", label: "Course Duration", minWidth: 100 },
   { id: "Course_data", label: "Course Name", minWidth: 100 },
-  { id: "Fee_data", label: "Course Fee", minWidth: 100 },
-  { id: "Deposited_amount", label: "Deposit Amount", minWidth: 100 },
-  { id: "Pending_amount", label: "Pending Amount", minWidth: 100 },
+  { id: "Fee_data", label: "Course Fee (Rs)", minWidth: 100 },
+  { id: "Deposited_amount", label: "Deposit Amount (Rs)", minWidth: 100 },
+  { id: "Pending_amount", label: "Pending Amount (Rs)", minWidth: 100 },
   // { id: "Payment_method", label: "Payment Method", minWidth: 100 },
   { id: "actions", label: "ACTIONS", minWidth: 100 },
 ];
@@ -67,18 +65,20 @@ export const RenderInvoiceTable = () => {
   };
   const handleDepositedModalClose = () => {
     setDepositedModalOpen(false);
-    setSelectedInvoiceId(null)
+    setSelectedInvoiceId(null);
   };
 
   const handlePayment = () => {
     handleModalClose();
+    setSelectedInvoiceId(null);
+
   };
 
   React.useEffect(() => {
     dispatch(setLoading(true));
-    dispatch({ type: GET_INVOICES });
-    dispatch({ type: GET_STUDENTS });
-    dispatch({ type: GET_COURSES });
+    // dispatch({ type: GET_INVOICES });
+    // dispatch({ type: GET_STUDENTS });
+    // dispatch({ type: GET_COURSES });
   }, [dispatch]);
 
   const handleChangeRowsPerPage = (event) => {
@@ -114,12 +114,14 @@ export const RenderInvoiceTable = () => {
     dispatch(setLoading(true));
     dispatch({ type: DELETE_INVOICE, payload: payload });
   };
+
   const editInvoice = (index, row) => {
     localStorage.setItem("invoicecreating", true);
     const invoice_id = invoices[index].id;
     dispatch(invoiceCreating(true));
     navigate(`/updateInvoice/${invoice_id}`);
   };
+
   const downloadInvoicePdf = (index) => {
     const invoice_id = invoices[index].id;
     dispatch(setLoading(true));
@@ -130,6 +132,7 @@ export const RenderInvoiceTable = () => {
     const invoice_id = invoices[index].id;
     navigate("/viewInvoice", { state: { invoice_id: invoice_id } });
   };
+
   React.useEffect(() => {
     const _invoices = invoices?.map((invoice, ind) => {
       return {
@@ -216,7 +219,6 @@ export const RenderInvoiceTable = () => {
                               }}
                             >
                               <>
-                                <span style={{ marginRight: "4px" }}>Rs</span>{" "}
                                 {value}
                               </>
                             </Box>
@@ -226,15 +228,16 @@ export const RenderInvoiceTable = () => {
                                 display: "flex",
                               }}
                             >
-                              <span style={{ marginRight: "4px" }}>Rs</span>
-                              <Link
-                                onClick={() => {
-                                  setSelectedInvoiceId(row);
-                                  handleDepositedModalOpen();
-                                }}
-                              >
-                              {value}
-                              </Link>
+                              <Tooltip title="Click to show paid amount">
+                                <Link
+                                  onClick={() => {
+                                    setSelectedInvoiceId(row);
+                                    handleDepositedModalOpen();
+                                  }}
+                                >
+                                  {value}
+                                </Link>
+                              </Tooltip>
                             </Box>
                           ) : column.id === "Pending_amount" ? (
                             <Box
@@ -246,16 +249,17 @@ export const RenderInvoiceTable = () => {
                               !isNaN(value) &&
                               String(value).trim() !== "0" ? (
                                 <>
-                                  <span style={{ marginRight: "4px" }}>Rs</span>{" "}
-                                  <Link
-                                    style={{ color: "red" }}
-                                    onClick={() => {
-                                      handleLinkClick();
-                                      setSelectedInvoice(row);
-                                    }}
-                                  >
-                                    {value}
-                                  </Link>
+                                  <Tooltip title="Click to pay pending amount">
+                                    <Link
+                                      style={{ color: "red"  }}
+                                      onClick={() => {
+                                        handleLinkClick();
+                                        setSelectedInvoice(row);
+                                      }}
+                                    >
+                                      {value}
+                                    </Link>
+                                  </Tooltip>
                                 </>
                               ) : (
                                 "0"
@@ -278,11 +282,14 @@ export const RenderInvoiceTable = () => {
             ) : (
               <TableRow>No Data is available</TableRow>
             )}
-            {isDepositedModalOpen && <PaymentList
-              isDepositedModalOpen={isDepositedModalOpen}
-              onClose={handleDepositedModalClose}
-              invoiceData={invoiceId}
-            />}
+            {isDepositedModalOpen && (
+              <PaymentList
+              setSelectedInvoiceId={setSelectedInvoiceId}
+                isDepositedModalOpen={isDepositedModalOpen}
+                onClose={handleDepositedModalClose}
+                invoiceData={invoiceId}
+              />
+            )}
             <PaymentModal
               isOpen={isModalOpen}
               onClose={handleModalClose}

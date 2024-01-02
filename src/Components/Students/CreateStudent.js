@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState, useEffect } from "react";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
@@ -8,11 +8,11 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import ProtectedRoute from "../../Routes/ProtectedRoute";
-import { getStudentPayload } from "../../CommonComponents/studentPayload";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoading } from "../../Store/Slices/Students";
 import {
+  GET_COURSE_LIST,
   GET_STUDENT,
   SAVE_STUDENT,
   UPDATE_STUDENT,
@@ -21,38 +21,84 @@ import Spinner from "../Spinner/Spinner";
 import { useNavigate, useParams } from "react-router-dom";
 import { Navbar } from "../Navbar/Navbar";
 import { Footer } from "../Footer/Footer";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 const theme = createTheme();
-
 
 export default function CreateStudent() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { id } = useParams();
   const { loading, studentCreating, student } = useSelector(
     (state) => state.Students
   );
-  const navigate = useNavigate();
+  const { duration: newCourses = {} } = useSelector((state) => state.invoices);
   const isStudentCreating = JSON.parse(localStorage.getItem("studentcreating"));
-  const [studentInfo, setStudentInfo] = React.useState({
+
+  const [studentInfo, setStudentInfo] = useState({
     name: "",
     email: "",
     phone: "",
     address: "",
+    course_duration: "",
+    course: "",
+    course_fee: "",
+    payment_method: "",
+    discount: "",
+    deposit_amount: "",
+    after_discount_fee: "",
   });
 
-  const [error, setError] = React.useState({ name: "", email: "", phone: "", address:"" });
+  const paymentMethods = [
+    "Google Pay",
+    "Phone Pay",
+    "Net Banking",
+    "Credit Card",
+    "Debit Card",
+    "Cash",
+  ];
+  const durations = Object.keys(newCourses);
+  const coursesList = newCourses[studentInfo?.course_duration] || [];
+
+  const [error, setError] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    course_duration: "",
+    course: "",
+    discount: "",
+    discountedFee: "",
+    course_fee: "",
+  });
   const handleSubmit = (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const payload = getStudentPayload(data);
+    const studentInfoPayload = new FormData();
+    studentInfoPayload.append("name", studentInfo.name);
+    studentInfoPayload.append("email", studentInfo.email);
+    studentInfoPayload.append("phone", studentInfo.phone);
+    studentInfoPayload.append("address", studentInfo.address);
+    studentInfoPayload.append("course_duration", studentInfo.course_duration);
+    studentInfoPayload.append("course", studentInfo.course);
+    studentInfoPayload.append("course_fee", studentInfo.course_fee);
+    studentInfoPayload.append("discount", studentInfo.discount);
+    studentInfoPayload.append("deposit_amount", studentInfo.deposit_amount);
+    studentInfoPayload.append("payment_method", studentInfo.payment_method);
 
-    if (!payload.name || !payload.email || !payload.phone || !payload.address) {
+    if (
+      !studentInfo.name ||
+      !studentInfo.email ||
+      !studentInfo.phone ||
+      !studentInfo.address ||
+      !studentInfo.course_duration ||
+      !studentInfo.course ||
+      !studentInfo.course_fee ||
+      !studentInfo.discount ||
+      !studentInfo.deposit_amount ||
+      !studentInfo.payment_method
+    ) {
       toast.error("Please fill all the required fields", {
         toastId: "sender_form",
       });
-      return;
-    }
-    if (error.name) {
-      toast.error("Please Enter valid Name");
       return;
     }
     if (error.email) {
@@ -66,18 +112,16 @@ export default function CreateStudent() {
     dispatch(setLoading(true));
 
     if (id) {
-
-      payload.id = studentInfo.id;
       dispatch({
         type: UPDATE_STUDENT,
         payload: studentInfo,
       });
       return;
     }
-    
+
     dispatch({
       type: SAVE_STUDENT,
-      payload: payload,
+      payload: studentInfoPayload,
     });
   };
 
@@ -104,51 +148,118 @@ export default function CreateStudent() {
   const isValidEmail = (email) => {
     return /\S+@\S+\.\S+/.test(email);
   };
- 
+
   const handleInput = (e) => {
-    if (e.target.name === "name") {
-      if (e.target.value === "" ) {
-        setError({ ...error, name: "Name is required" });
-      } else {
-        setError({ ...error, name: "" });
-      }
-    }
-    if (e.target.name === "email") {
-      if (e.target.value !== "" && !isValidEmail(e.target.value)) {
-        setError({ ...error, email: "Email is invalid" });
-      } else {
-        setError({ ...error, email: "" });
-      }
-    }
-  
-    if (e.target.name === "phone") {
-      if (
-        e.target.value !== "" &&
-        (e.target.value.length > 10 || e.target.value.length < 10)
-      ) {
-        setError({
-          ...error,
-          phone: "Phone number must be atleast 10 numbers",
-        });
-      } else {
-        setError({ ...error, phone: "" });
-      }
-    }
-    if (e.target.name === "address") {
-      if (
-        e.target.value === "" ) {
-        setError({
-          ...error,
-          address: "Address is required",
-        });
-      } else {
-        setError({ ...error, address: "" });
-      }
+    switch (e.target.name) {
+      case "name":
+        setError((prevError) => ({
+          ...prevError,
+          name: e.target.value ? "" : "Name is required",
+        }));
+        break;
+      case "email":
+        setError((prevError) => ({
+          ...prevError,
+          email:
+            e.target.value && !isValidEmail(e.target.value)
+              ? "Email is invalid"
+              : "",
+        }));
+        break;
+      case "phone":
+        setError((prevError) => ({
+          ...prevError,
+          phone:
+            e.target.value && e.target.value.length !== 10
+              ? "Phone number must be exactly 10 numbers"
+              : "",
+        }));
+        break;
+      case "address":
+        setError((prevError) => ({
+          ...prevError,
+          address: e.target.value ? "" : "Address is required",
+        }));
+        break;
+      case "course_duration":
+        setError((prevError) => ({
+          ...prevError,
+          course_duration: e.target.value ? "" : "Duration is required",
+        }));
+        break;
+      default:
+        break;
     }
 
-      
-    setStudentInfo({ ...studentInfo, [e.target.name]: e.target.value });
+    if (e.target.name === "course") {
+      const selectedCourse = coursesList.find(
+        (course) => course.name === e.target.value
+      );
+      setStudentInfo((prevStudentInfo) => ({
+        ...prevStudentInfo,
+        course_fee: selectedCourse ? selectedCourse.fee : "",
+        [e.target.name]: e.target.value,
+      }));
+    }
+    if (e.target.name === "discount") {
+      const discountValue = parseFloat(e.target.value) || 0;
+      const cappedDiscount = Math.min(Math.max(discountValue, 0), 100);
+      const originalFee = parseFloat(studentInfo.course_fee) || 0;
+      const discountedFee = Math.max(
+        originalFee * (1 - cappedDiscount / 100),
+        0
+      );
+      setStudentInfo((prevStudentInfo) => ({
+        ...prevStudentInfo,
+        [e.target.name]: cappedDiscount,
+        after_discount_fee: discountedFee.toFixed(2),
+      }));
+      e.target.value = cappedDiscount;
+    }
+
+    if (e.target.name === "deposit_amount") {
+      const depositAmount = parseFloat(e.target.value);
+      const courseFee = parseFloat(studentInfo.course_fee);
+      const afterDiscountFee = parseFloat(studentInfo.after_discount_fee);
+
+      if (depositAmount > courseFee) {
+        setError((prevError) => ({
+          ...prevError,
+          deposit_amount: toast.error(
+            "Deposit amount cannot be greater than course fee"
+          ),
+        }));
+      } else if (depositAmount > afterDiscountFee) {
+        setError((prevError) => ({
+          ...prevError,
+          deposit_amount: toast.error(
+            "Deposit amount cannot be greater than after discount fee"
+          ),
+        }));
+      } else {
+        setError((prevError) => ({
+          ...prevError,
+          deposit_amount: "",
+        }));
+
+        setStudentInfo((prevStudentInfo) => ({
+          ...prevStudentInfo,
+          [e.target.name]: depositAmount,
+        }));
+      }
+    } else {
+      setStudentInfo((prevStudentInfo) => ({
+        ...prevStudentInfo,
+        [e.target.name]: e.target.value,
+      }));
+    }
   };
+
+  useEffect(() => {
+    dispatch({
+      type: GET_COURSE_LIST,
+    });
+  }, [dispatch]);
 
   return (
     <ProtectedRoute>
@@ -159,7 +270,7 @@ export default function CreateStudent() {
           <CssBaseline />
           <Box
             sx={{
-              marginTop: 16,
+              marginTop: 9,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
@@ -172,11 +283,10 @@ export default function CreateStudent() {
               component="form"
               noValidate
               onSubmit={handleSubmit}
-              sx={{ mt: 3 }}
-
+              sx={{ mt: 2 }}
             >
               <Grid container spacing={2}>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <TextField
                     required
                     fullWidth
@@ -188,9 +298,11 @@ export default function CreateStudent() {
                     onChange={handleInput}
                     value={studentInfo.name}
                   />
-                {error.name && <Typography className="emailError">{error.name}</Typography>}
+                  {error.name && (
+                    <Typography className="emailError">{error.name}</Typography>
+                  )}
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <TextField
                     required
                     fullWidth
@@ -202,9 +314,13 @@ export default function CreateStudent() {
                     onChange={handleInput}
                     value={studentInfo.email}
                   />
-                {error.email &&  <Typography className="emailError">{error.email}</Typography>}
+                  {error.email && (
+                    <Typography className="emailError">
+                      {error.email}
+                    </Typography>
+                  )}
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <TextField
                     type="number"
                     required
@@ -219,9 +335,9 @@ export default function CreateStudent() {
                   />
                   <Typography className="emailError">{error.phone}</Typography>
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <TextField
-                  required
+                    required
                     fullWidth
                     id="address"
                     label="Address"
@@ -230,11 +346,154 @@ export default function CreateStudent() {
                     inputProps={{ sx: { height: 10, marginTop: 1 } }}
                     onChange={handleInput}
                     value={studentInfo.address}
+                    disabled={id ? true : false}
                   />
-                  <Typography className="emailError">{error.address}</Typography>
-
+                  <Typography className="emailError">
+                    {error.address}
+                  </Typography>
                 </Grid>
               </Grid>
+              <Grid container spacing={1}>
+                <Grid item xs={6}>
+                  <FormControl sx={{ width: "100%", marginTop: 2 }} required>
+                    <InputLabel id="demo-simple-select-label">
+                      Course Duration
+                    </InputLabel>
+                    <Select
+                      name="course_duration"
+                      labelId="course_duration"
+                      id="course_duration"
+                      value={studentInfo?.course_duration}
+                      label="duration_type"
+                      onChange={handleInput}
+                      disabled={id ? true : false}
+                    >
+                      {durations.map((duration, ind) => (
+                        <MenuItem value={duration} key={ind}>
+                          {duration}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={6}>
+                  <FormControl sx={{ width: "100%", marginTop: 2 }} required>
+                    <InputLabel id="demo-simple-select-label">
+                      Course
+                    </InputLabel>
+                    <Select
+                      name="course"
+                      labelId="course"
+                      id="course"
+                      value={studentInfo?.course}
+                      label="course_type"
+                      onChange={handleInput}
+                      disabled={id ? true : false}
+                    >
+                      {coursesList.map((course, ind) => (
+                        <MenuItem value={course.name} key={ind}>
+                          {course.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  {error.selectedDuration && (
+                    <Typography className="emailError">
+                      {error.selectedDuration}
+                    </Typography>
+                  )}
+                </Grid>
+              </Grid>
+
+              <Box sx={{ width: "100%", marginTop: 2 }}>
+                <TextField
+                  required
+                  fullWidth
+                  id="selectedCourseFee"
+                  label="Course Fee"
+                  name="course_fee"
+                  autoComplete="course_fee"
+                  inputProps={{ sx: { height: 10, marginTop: 1 } }}
+                  value={studentInfo.course_fee}
+                  onChange={handleInput}
+                  disabled
+                />
+              </Box>
+
+              <Grid container spacing={1}>
+                <Grid item xs={4}>
+                  <Box sx={{ width: "100%", marginTop: 2 }}>
+                    <TextField
+                      required
+                      fullWidth
+                      // type="number"
+                      id="discount"
+                      label="Discount (%)"
+                      name="discount"
+                      autoComplete="name"
+                      inputProps={{ sx: { height: 10, marginTop: 1 } }}
+                      value={studentInfo.discount}
+                      onChange={handleInput}
+                    />
+                  </Box>
+                </Grid>
+
+                <Grid item xs={4}>
+                  <Box sx={{ width: "100%", marginTop: 2 }}>
+                    <TextField
+                      required
+                      fullWidth
+                      type="number"
+                      id="after_discount_fee"
+                      label="After Discount Fee"
+                      name="after_discount_fee"
+                      autoComplete="after_discount_fee"
+                      inputProps={{ sx: { height: 10, marginTop: 1 } }}
+                      value={studentInfo.after_discount_fee}
+                      onChange={handleInput}
+                      disabled
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={4}>
+                  <Box sx={{ width: "100%", marginTop: 2 }}>
+                    <TextField
+                      required
+                      fullWidth
+                      type="number"
+                      id="deposit_amount"
+                      label="Deposit Amount"
+                      name="deposit_amount"
+                      autoComplete="name"
+                      inputProps={{ sx: { height: 10, marginTop: 1 } }}
+                      value={studentInfo.deposit_amount}
+                      onChange={handleInput}
+                      disabled={id ? true : false}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
+
+              <FormControl sx={{ width: "100%", marginTop: 2 }} required>
+                <InputLabel id="demo-simple-select-label">
+                  Payment Method
+                </InputLabel>
+                <Select
+                  labelId="payment_method"
+                  id="payment_method"
+                  name="payment_method"
+                  value={studentInfo.payment_method}
+                  label="payment_type"
+                  onChange={handleInput}
+                  disabled={id ? true : false}
+                >
+                  {paymentMethods.map((method) => (
+                    <MenuItem key={method} value={method}>
+                      {method}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
               <Box mt={3}>
                 <Button
                   type="submit"

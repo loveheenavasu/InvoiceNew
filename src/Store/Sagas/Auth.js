@@ -9,9 +9,11 @@ import { useDispatch } from "react-redux";
 function* loginUser(action) {
   try {
     const response = yield call(loginRequest, action);
+    console.log("response",response)
+
     yield put(handleUserLogin(response?.data));
   } catch (e) {
-    toast.error(e?.response?.data?.error?.[0] || e?.response?.data?.message);
+    toast.error(e?.response?.data?.error || e?.response?.data?.message);
     yield put(setLoading(false));
   }
 }

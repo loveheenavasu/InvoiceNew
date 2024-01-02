@@ -33,10 +33,10 @@ export const RenderCourseTable = () => {
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [coursesData, setCoursesData] = React.useState([]);
 
-  React.useEffect(() => {
-    dispatch(setLoading(true));
-    dispatch({ type: GET_COURSES });
-  }, [dispatch]);
+  // React.useEffect(() => {
+  //   dispatch(setLoading(true));
+  //   dispatch({ type: GET_COURSES });
+  // }, [dispatch]);
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(+event.target.value);
@@ -145,7 +145,7 @@ export const RenderCourseTable = () => {
                     </TableRow>
                   );
                 })
-              : "No Data is available"}
+              : ""}
           </TableBody>
         </Table>
       </TableContainer>

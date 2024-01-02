@@ -44,9 +44,8 @@ export const get_course_fee = (action)=>{
   return AXIOS.post('course-fee', data)
 }
 export const get_course_list = (action)=>{
-  return AXIOS.post('course-list', action.payload)
+  return AXIOS.get('course-list')
 }
-
 export const pending_amount = (action) => {
   return AXIOS.post("pay-pending", action.payload );
 };

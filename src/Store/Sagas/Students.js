@@ -3,14 +3,14 @@ import { GET_STUDENTS, DELETE_STUDENT, UPDATE_STUDENT, SAVE_STUDENT,GET_STUDENT 
 import { _saveStudents, _saveStudent, setLoading, studentCreated } from "../Slices/Students";
   import { takeLatest, put, call } from "redux-saga/effects";
   import { toast } from "react-toastify";
-  import { store } from "../Store";
+  // import { store } from "../Store";
   
   function* getStudents(action) {
     try {
       const response = yield call(fetchStudents, action);
       yield put(_saveStudents(response?.data));
     } catch (e) {
-      toast.error(e?.response?.data?.error?.[0] || e?.response?.data?.message);
+      toast.error(e?.response?.data?.error || e?.response?.data?.message);
       yield put(setLoading(false));
     }
   }
@@ -29,13 +29,16 @@ import { _saveStudents, _saveStudent, setLoading, studentCreated } from "../Slic
     try {
       const response = yield call(removeStudent, action?.payload.clientId);
       if (response.status === 200) {
-        store.dispatch({
-          type: GET_STUDENTS,
-          payload: {
-            page: action?.payload.page,
-            rows: action?.payload.row,
-          },
-        });
+        // store.dispatch({
+        //   type: GET_STUDENTS,
+        //   payload: {
+        //     page: action?.payload.page,
+        //     rows: action?.payload.row,
+        //   },
+        // });
+        toast.success("Student deleted successfully");
+        yield put({ type: GET_STUDENTS });
+
       }
     } catch (e) {
       toast.error(e?.response?.data?.error?.[0] || e?.response?.data?.message);
@@ -46,26 +49,42 @@ import { _saveStudents, _saveStudent, setLoading, studentCreated } from "../Slic
   function* saveStudent(action) {
     try {
       const response = yield call(createStudent, action);
+      
       if (response.status === 200) {
         yield put(studentCreated());
-        toast.success("student has been saved successfully");
+        toast.success("Student has been saved successfully");
       }
-    } catch (e) {
-
-      toast.error(e?.response?.data?.error?.[0] || e?.response?.data?.message);
+    } catch (e) {  
+      let errorMessage = "An error occurred";
+      if (e.response && e.response.data && e.response.data.error) {
+        const emailError = e.response.data.error.email;
+        const phoneError = e.response.data.error.phone;
+  
+        if (emailError) {
+          errorMessage = emailError[0];
+        } else if (phoneError) {
+          errorMessage = phoneError[0];
+        }
+      }
+  
+      toast.error(errorMessage);
       yield put(setLoading(false));
     }
   }
+  
+  
   
   function* updateStudent(action) {
     try {
       const response = yield call(editStudent, action);
       if (response.status === 200) {
         yield put(studentCreated());
-        toast.success("client has been updated successfully");
-        store.dispatch({
-          type: GET_STUDENTS,
-        });
+        toast.success("Student Information has been updated successfully");
+        // store.dispatch({
+        //   type: GET_STUDENTS,
+        // });
+        yield put({ type: GET_STUDENTS });
+
       }
     } catch (e) {
       toast.error(e?.response?.data?.error?.[0] || e?.response?.data?.message);

@@ -10,19 +10,21 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { styled } from "@mui/material/styles";
-import { viewInvoice } from "../../Services/Invoice_Services";
+// import { viewInvoice } from "../../Services/Invoice_Services";
+import { viewInvoice } from "../../Services/Students_Services";
 import { useLocation } from "react-router-dom";
 import Tooltip from "@mui/material/Tooltip";
 import DownloadIcon from "@mui/icons-material/Download";
 import { setLoading } from "../../Store/Slices/Invoice";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { DOWNLOAD_PDF } from "../../Store/Action_Constants";
 import Spinner from "../Spinner/Spinner";
 import { fetchSenderCompany } from "../../Services/Sender_Company_Info";
+import { toast } from "react-toastify";
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
   "&:nth-of-type(odd)": {
-    backgroundColor: "rgb(243 243 243);",
+    // backgroundColor: "rgb(243 243 243);",
   },
   "&:last-child td, &:last-child th": {
     border: 0,
@@ -35,13 +37,15 @@ export const ViewInvoice = (props) => {
   const dispatch = useDispatch();
   // const paymentListdata = useSelector((state) => state.Payment.paymentList);
 
-  console.log("sfd", data);
+  console.log("data", data);
+
   useEffect(() => {
     const fetchViewInvoiceData = async () => {
       try {
         const invoiceData = await viewInvoice(location.state.invoice_id);
         setData(invoiceData?.data?.data);
       } catch (error) {
+        toast.error(error.message);
         console.error("Error fetching invoice data", error);
       }
     };
@@ -73,7 +77,9 @@ export const ViewInvoice = (props) => {
     { id: "course", label: "Course Name", name: "fffff" },
     { id: "duration", label: "Duration", name: "cccc" },
     // { id: "Payment Type", label: "Payment Type", name: "eeee" },
-    { id: "Total price", label: "Total Fee", name: "ggggg" },
+    { id: "course fee", label: "Course Fee (Rs)", name: "ggggg" },
+    { id: "discount", label: "Discount (%)", name: "ggggg" },
+    { id: "total", label: "Total (Rs)", name: "ggggg" },
   ];
 
   // const paidAmountColumn = [
@@ -84,7 +90,7 @@ export const ViewInvoice = (props) => {
     <ProtectedRoute>
       <Navbar />
 
-      {data ? (
+      {data && companyData ? (
         <Container className="invoice-container">
           <Divider
             sx={{
@@ -139,7 +145,7 @@ export const ViewInvoice = (props) => {
                 fontWeight: 700,
               }}
             >
-              {companyData[0]?.phone}
+              +91 {companyData[0]?.phone}
             </Typography>
           </Box>
           <Box
@@ -147,7 +153,7 @@ export const ViewInvoice = (props) => {
               display: "flex",
               justifyContent: "center",
               gap: "4%",
-              marginTop: "12px",
+              // marginTop: "12px",
             }}
             className="heading"
           >
@@ -156,7 +162,7 @@ export const ViewInvoice = (props) => {
                 fontWeight: 700,
               }}
             >
-              CIN: {companyData[0]?.cin}
+              {/* CIN: {companyData[0]?.cin} */}
             </Typography>
 
             <Typography
@@ -164,19 +170,25 @@ export const ViewInvoice = (props) => {
                 fontWeight: 700,
               }}
             >
-              GSTIN: {companyData[0]?.gstin}
+              {/* GSTIN: {companyData[0]?.gstin} */}
             </Typography>
           </Box>
 
           <Box
             sx={{
               display: "flex",
-              justifyContent: "end",
-              alignItems: "end",
+              justifyContent: "space-between",
+              // alignItems: "end",
+              mt: 1,
               marginRight: "4rem",
             }}
           >
-           
+            <Typography
+              // variant="h6"
+              sx={{ marginLeft: 16, color: "#EF7CB5", fontWeight: 900 }}
+            >
+              Invoice Date:- {new Date(data.created_at).toLocaleString()}
+            </Typography>
             <Tooltip title="Download Invoice">
               <DownloadIcon
                 className="cursor_pointer"
@@ -184,19 +196,23 @@ export const ViewInvoice = (props) => {
               />
             </Tooltip>
           </Box>
-        
-          <Typography
-            variant="h6"
-            sx={{ marginLeft: 16, color: "#f04da5", fontWeight: 900 }}
+
+          {/* <Typography
+            sx={{
+              marginLeft: 16,
+              // marginTop: 3,
+              color: "#EF7CB5",
+              fontWeight: "600",
+            }}
           >
-            {/* Submitted On : {data?.datainvoice[0]?.invoicedate} */}
-          </Typography>
-          <Grid container spacing={2} marginTop={2}>
+            Invoice Date:- {new Date(data.created_at).toLocaleString()}
+          </Typography> */}
+          <Grid container spacing={2}>
             <Grid item xs={8}>
               <Box>
                 <Typography
                   variant="h5"
-                  sx={{ fontWeight: 600, marginLeft: 16 }}
+                  sx={{ fontWeight: 600, marginLeft: 16, marginTop: 1.5 }}
                 >
                   Invoice for
                 </Typography>
@@ -211,7 +227,17 @@ export const ViewInvoice = (props) => {
                       color: "#66666C",
                     }}
                   >
-                    {JSON.parse(data?.student_data)?.name}
+                    <Typography
+                      sx={{
+                        fontWeight: 500,
+                        display: "inline",
+                        fontSize: "18px",
+                        color: "black",
+                      }}
+                    >
+                      Name: {""}
+                    </Typography>
+                    {data?.name}
                   </Typography>
                 </Box>
                 <Typography
@@ -224,7 +250,39 @@ export const ViewInvoice = (props) => {
                     color: "#66666C",
                   }}
                 >
-                  {data?.datainvoice?.[0]?.client_detail?.address}
+                  <Typography
+                    sx={{
+                      fontWeight: 500,
+                      display: "inline",
+                      fontSize: "18px",
+                      color: "black",
+                    }}
+                  >
+                    Phone: {""}
+                  </Typography>
+                  +91 {data?.phone}
+                </Typography>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: 500,
+                    fontSize: "18px",
+                    marginTop: 1,
+                    marginLeft: "8rem",
+                    color: "#66666C",
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontWeight: 500,
+                      display: "inline",
+                      fontSize: "18px",
+                      color: "black",
+                    }}
+                  >
+                    Email: {""}
+                  </Typography>
+                  {data?.email}
                 </Typography>
                 <Typography
                   variant="h5"
@@ -254,11 +312,14 @@ export const ViewInvoice = (props) => {
               </Box>
             </Grid>
             <Grid item xs={4}>
-              <Typography variant="h5" sx={{ fontWeight: 600 }}>
+              <Typography variant="h5" sx={{ fontWeight: 600, mt: 1.5 }}>
                 Invoice #
               </Typography>
               <Typography variant="h6" sx={{ color: "gray", marginTop: 1 }}>
-                {/* {data?.data.invoice_number} */}
+                {`ZSPL/${new Date(data.created_at).toLocaleDateString("en-US", {
+                  year: "2-digit",
+                  month: "numeric",
+                })}/${data.id}`}
               </Typography>
               <Typography
                 variant="h5"
@@ -302,7 +363,7 @@ export const ViewInvoice = (props) => {
                 <TableRow>
                   {columns?.map((column) => (
                     <TableCell key={column?.id} align={column?.align}>
-                      <b style={{ color: "#00008d",fontSize: 17 }}>
+                      <b style={{ color: "#00008d", fontSize: 17 }}>
                         {column?.label}
                       </b>
                     </TableCell>
@@ -312,23 +373,17 @@ export const ViewInvoice = (props) => {
               <TableBody>
                 <>
                   <StyledTableRow>
-                  
-                    <TableCell>{JSON.parse(data?.course_data)?.name}</TableCell>
-                    <TableCell>
-                      {JSON.parse(data?.course_data)?.duration}
-                    </TableCell>
-                    <TableCell>
-                      {JSON.parse(data?.course_data)?.fee}
-                      {data?.totalPrice}
-                    </TableCell>
+                    <TableCell>{data?.course}</TableCell>
+                    <TableCell>{data?.course_duration}</TableCell>
+                    <TableCell>{data?.course_fee}</TableCell>
+                    <TableCell>{data?.discount}</TableCell>
+                    <TableCell>{data?.after_discount_fee}</TableCell>
                   </StyledTableRow>
                 </>
               </TableBody>
             </Table>
           </TableContainer>
-          <Typography  sx={{ marginLeft: 18, marginTop: 3, color:'#EF7CB5', fontWeight:'bold' }}>
-            Total Fee Paid:-
-          </Typography>
+
           <Divider
             sx={{
               borderBottomWidth: 2,
@@ -340,7 +395,7 @@ export const ViewInvoice = (props) => {
           <Box className="invoice-view-total">
             <Box className="invoice-total">
               <Grid container spacing={2}>
-                <Grid item sm={4.7}>
+                {/* <Grid item sm={4.7}>
                   <Typography
                     variant="h5"
                     sx={{
@@ -367,23 +422,23 @@ export const ViewInvoice = (props) => {
                   >
                     {JSON.parse(data?.course_data)?.fee}
                   </Typography>
-                </Grid>
+                </Grid> */}
 
-                <Grid item sm={4.6}>
+                <Grid item>
                   <Typography
                     variant="h5"
                     sx={{
-                      fontWeight: 400,
-                      fontSize: "18px",
+                      fontWeight: 800,
+                      fontSize: "22px",
                       marginTop: 1,
-                      color: "#37429A",
-                      // marginLeft: 9,
+                      color: "#EF7CB5",
+                      // marginRight: 0,
                     }}
                   >
-                    Final Total
+                    Total Amount:- INR {data.after_discount_fee}
                   </Typography>
                 </Grid>
-                <Grid item sm={6}>
+                {/* <Grid item sm={6}>
                   <Typography
                     variant="h4"
                     sx={{
@@ -393,8 +448,46 @@ export const ViewInvoice = (props) => {
                   >
                     {JSON.parse(data?.course_data)?.fee}
                   </Typography>
-                </Grid>
+                </Grid> */}
               </Grid>
+            </Box>
+          </Box>
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Box p={2} maxWidth="700px">
+              <Typography  sx={{fontSize:'15px'}} gutterBottom>
+                If you have any questions or concerns about this invoice, please
+                contact us at +91 {companyData[0]?.phone}.
+              </Typography>
+
+              <hr />
+
+              <Typography
+                variant="body2"
+                style={{
+                  fontStyle: "italic",
+                  marginTop: "16px",
+                  color: "#555",
+                }}
+              >
+                [<b>Note:</b> This is a computer-generated invoice,
+                there is no need for a signature.]
+              </Typography>
+
+              <Typography
+                variant="body1"
+                style={{
+                  fontStyle: "italic",
+                  marginTop: "16px",
+                  color: "#007BFF",
+                }}
+              >
+                Thank you for choosing {companyData[0]?.name}!
+              </Typography>
             </Box>
           </Box>
         </Container>

@@ -5,7 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { Invoice } from "./Components/Invoice/Invoice";
 import { CreateInvoice } from "./Components/Invoice/CreateInvoice";
-import {ViewInvoice} from "./Components/Invoice/ViewInvoice"
+import { ViewInvoice } from "./Components/Students/ViewInvoice";
 import "./App.css";
 import CreateCourse from "./Components/Course/CreateCourse";
 import { Course } from "./Components/Course/Course";

@@ -25,9 +25,9 @@
 }
 
 .footer_main {
-  position: sticky;
+  position: fixed;
   left: 0;
-  bottom: 0;
+  bottom: 5px;
   width: 100%;
   background-color: lightgray;
   height: 40px;

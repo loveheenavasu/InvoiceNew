@@ -7,9 +7,10 @@ import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import TableRow from "@mui/material/TableRow";
 import Button from "@mui/material/Button";
-import { TextField } from "@mui/material";
+import { TextField, Tooltip } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
+import EditIcon from "@mui/icons-material/Edit";
 import { useDispatch, useSelector } from "react-redux";
 import { PAYMENT_LIST, UPDATE_PAYMENT } from "../../Store/Action_Constants";
 import { clearPaymentList, setLoading } from "../../Store/Slices/Payment";
@@ -50,23 +51,15 @@ const PaymentList = ({ isDepositedModalOpen, onClose, invoiceData }) => {
     }
   };
 
-  // const handleEdit = (value, columnId, index) => {
-  //   if (columnId === "amount" || columnId === "payment_method") {
-  //     setEditedData({
-  //       ...editedData,
-  //       [index]: {
-  //         ...editedData[index],
-  //         [columnId]: value,
-  //       },
-  //     });
-  //   }
-  // };
   const handleEdit = (value, columnId, index) => {
     const invoiceAmount = invoiceData?.Fee_data || invoiceData?.Pending_amount;
-  
+
     const isValidNumber = !isNaN(parseFloat(value)) && isFinite(value);
-  
-    if (isValidNumber && (columnId === "amount" || columnId === "payment_method")) {
+
+    if (
+      isValidNumber &&
+      (columnId === "amount" || columnId === "payment_method")
+    ) {
       if (parseFloat(value) <= invoiceAmount) {
         setEditedData({
           ...editedData,
@@ -88,16 +81,16 @@ const PaymentList = ({ isDepositedModalOpen, onClose, invoiceData }) => {
       });
     }
   };
-  
-  
 
   const applyEdits = async () => {
-
     try {
       for (const index in editedData) {
         const editedItem = editedData[index];
         const paymentItem = paymentListdata[index];
-
+        if (!editedItem.amount || !editedItem.payment_method) {
+          toast.error("All fields are required");
+          return;
+        }
         const updatedData = {
           id: paymentItem.id,
           amount: editedItem.amount || paymentItem.amount,
@@ -107,8 +100,6 @@ const PaymentList = ({ isDepositedModalOpen, onClose, invoiceData }) => {
 
         dispatch({ type: UPDATE_PAYMENT, payload: updatedData });
       }
-      // await new Promise(resolve => setTimeout(resolve, 1000));
-
       setEditedData({});
       toggleEditMode(null);
     } catch (error) {
@@ -119,14 +110,20 @@ const PaymentList = ({ isDepositedModalOpen, onClose, invoiceData }) => {
   React.useEffect(() => {
     if (invoiceData.Invoice_Number) {
       setLoading(true);
-      dispatch({ type: PAYMENT_LIST, payload: { id: invoiceData.Invoice_Number } });
+      dispatch({
+        type: PAYMENT_LIST,
+        payload: { id: invoiceData.Invoice_Number },
+      });
     }
   }, [invoiceData.Invoice_Number, dispatch]);
 
   return (
     <Modal
       open={isDepositedModalOpen}
-      onClose={onClose}
+      onClose={() => {
+        dispatch(clearPaymentList());
+        onClose();
+      }}
       aria-labelledby="deposited-amounts-modal-title"
       aria-describedby="deposited-amounts-modal-description"
     >
@@ -150,15 +147,11 @@ const PaymentList = ({ isDepositedModalOpen, onClose, invoiceData }) => {
             <TableRow>
               {paymentListColumns.map((column) => (
                 <TableCell key={column.id} align="left">
-                  <b>
-                    {column.label}
-                  </b>
+                  <b>{column.label}</b>
                 </TableCell>
               ))}
               <TableCell align="left">
-                <b>
-                  Actions
-                </b>
+                <b>Actions</b>
               </TableCell>
             </TableRow>
           </TableHead>
@@ -171,7 +164,7 @@ const PaymentList = ({ isDepositedModalOpen, onClose, invoiceData }) => {
                     (column.id === "amount" ||
                       column.id === "payment_method") ? (
                       <TextField
-                      required
+                        required
                         type="text"
                         value={
                           editedData[index]?.[column.id] !== undefined
@@ -196,7 +189,14 @@ const PaymentList = ({ isDepositedModalOpen, onClose, invoiceData }) => {
                   {editableRow === index ? (
                     <Button onClick={() => applyEdits()}>Update</Button>
                   ) : (
-                    <Button onClick={() => toggleEditMode(index)}>Edit</Button>
+                    <>
+                      <Tooltip title="Update Payment">
+                        <EditIcon
+                          className="cursor_pointer"
+                          onClick={() => toggleEditMode(index)}
+                        />
+                      </Tooltip>
+                    </>
                   )}
                 </TableCell>
               </TableRow>

@@ -17,6 +17,9 @@ export const removeStudent = (action) => {
 export const createStudent = (action) => {
   return AXIOS.post("create-student", action?.payload);
 };
+export const viewInvoice = (action) => {
+  return AXIOS.get(`view-student/${action}`);
+};
 
 export const editStudent = (action) => {
   return AXIOS.put(`update-student/${action.payload.id}`,(action.payload) );

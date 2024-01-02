@@ -13,11 +13,11 @@ const courses = createSlice({
   initialState,
   reducers: {
     _saveCourses: (state, action) => {
-      const { data, total_course_record } = action.payload || {};
+      const { data, total } = action.payload || {};
       return {
         ...state,
-        courses: data || [],
-        totalCourses: total_course_record || 0,
+        courses: data.courses || [],
+        totalCourses: total || 0,
         loading: false,
       };
     },
