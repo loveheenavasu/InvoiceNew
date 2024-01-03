@@ -34,8 +34,8 @@ const columns = [
   { id: "duration", label: "Course Duration", minWidth: 100 },
   { id: "fee", label: "Course Fee (Rs)", minWidth: 100 },
   { id: "discount", label: "Discount (%)", minWidth: 100 },
+  { id: "after_discount_fee", label: "Fee After Discount (Rs)", minWidth: 100 },
   { id: "deposit", label: "Deposit (Rs)", minWidth: 100 },
-  { id: "after_discount_fee", label: "After Discount Fee (Rs)", minWidth: 100 },
   { id: "payment_method", label: "Payment Method", minWidth: 100 },
   { id: "actions", label: "ACTIONS", minWidth: 100 },
 ];
@@ -192,7 +192,13 @@ export const RenderStudentsTable = () => {
                     </TableRow>
                   );
                 })
-              : ""}
+              :  (
+                <TableRow>
+                  <TableCell colSpan={columns.length} style={{ color: '#888' }}>
+                    No Data is available
+                  </TableCell>
+                </TableRow>
+              )}
           </TableBody>
         </Table>
       </TableContainer>

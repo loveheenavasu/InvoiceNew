@@ -27,7 +27,11 @@
 
 .buttonFontSize {
   font-size: 11px;
-  color: "#a1a1a1";
+  color: #a1a1a1;
+  
+}
+.buttonFontSize.active{
+  background-color: #e0ece7;
 }
 
 .avatar {

@@ -11,7 +11,6 @@ import ProtectedRoute from "../../Routes/ProtectedRoute";
 import { getCoursePayload } from "../../CommonComponents/coursePayload";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
-// import { setLoading } from "../../Store/Slices/Clients";
 import { setLoading } from "../../Store/Slices/Courses";
 import {
   GET_COURSE,
@@ -22,13 +21,13 @@ import Spinner from "../Spinner/Spinner";
 import { useNavigate, useParams } from "react-router-dom";
 import { Navbar } from "../Navbar/Navbar";
 import { Footer } from "../Footer/Footer";
-import TextareaAutosize from "@mui/base/TextareaAutosize";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 const theme = createTheme();
 
 export default function CreateCourse() {
   const dispatch = useDispatch();
   const { id } = useParams();
-  const { loading, courseCreating, courses, course } = useSelector(
+  const { loading, courseCreating, course } = useSelector(
     (state) => state.Courses
   );
   const navigate = useNavigate();
@@ -80,14 +79,16 @@ export default function CreateCourse() {
 
   React.useEffect(() => {
     if (id) setCourseInfo(course);
-  }, [course]);
+  }, [course, id]);
 
   React.useEffect(() => {
     if (id) {
       dispatch(setLoading(true));
       dispatch({ type: GET_COURSE, payload: id });
     }
-  }, []);
+  }, [dispatch, id]);
+
+
 
   React.useEffect(() => {
     if (
@@ -99,7 +100,6 @@ export default function CreateCourse() {
   }, [courseCreating, isCourseCreating, navigate]);
 
   const handleInput = (e) => {
-
     if (e.target.name === "name") {
       if (e.target.value === "") {
         setError({ ...error, name: "Course Name is required" });
@@ -136,7 +136,7 @@ export default function CreateCourse() {
       <Navbar />
       <Spinner loading={loading} />
       <ThemeProvider theme={theme}>
-        <Container component="main" maxWidth="sm" className="main-container">
+        <Container component="main" maxWidth="" className="main-container">
           <CssBaseline />
           <Box
             sx={{
@@ -154,6 +154,7 @@ export default function CreateCourse() {
               noValidate
               onSubmit={handleSubmit}
               sx={{ mt: 3 }}
+              width={"400px"}
             >
               <Grid container spacing={2}>
                 <Grid item xs={12}>
@@ -164,7 +165,7 @@ export default function CreateCourse() {
                     label="Course Name"
                     name="name"
                     autoComplete="coursename"
-                    inputProps={{ sx: { height: 10, marginTop: 1 } }}
+                    // inputProps={{ sx: { height: 10, marginTop: 1 } }}
                     onChange={handleInput}
                     value={courseInfo.name}
                   />
@@ -172,18 +173,24 @@ export default function CreateCourse() {
                     <Typography className="emailError">{error.name}</Typography>
                   )}
                 </Grid>
+
                 <Grid item xs={12}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="Courseduration"
-                    label="Course Duration "
-                    name="duration"
-                    autoComplete="Courseduration"
-                    inputProps={{ sx: { height: 10, marginTop: 1 } }}
-                    onChange={handleInput}
-                    value={courseInfo.duration}
-                  />
+                  <FormControl fullWidth required>
+                    <InputLabel id="demo-simple-select-label">
+                      Course Duration
+                    </InputLabel>
+                    <Select
+                      labelId="Courseduration"
+                      id="Courseduration"
+                      name="duration"
+                      value={courseInfo.duration}
+                      label="Courseduration"
+                      onChange={handleInput}
+                    >
+                      <MenuItem value="3 Months">3 Months</MenuItem>
+                      <MenuItem value="6 Months">6 Months</MenuItem>
+                    </Select>
+                  </FormControl>
                   {error.duration && (
                     <Typography className="emailError">
                       {error.duration}
@@ -199,7 +206,7 @@ export default function CreateCourse() {
                     label="Course Fee"
                     name="fee"
                     autoComplete="Coursefee"
-                    inputProps={{ sx: { height: 10, marginTop: 1 } }}
+                    // inputProps={{ sx: { height: 10, marginTop: 1 } }}
                     value={courseInfo.fee}
                     onChange={handleInput}
                   />

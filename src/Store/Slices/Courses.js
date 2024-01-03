@@ -6,6 +6,7 @@ const initialState = {
   courseCreating: false,
   course: {},
   totalCourses: 0,
+  duration:[]
 };
 
 const courses = createSlice({
@@ -13,11 +14,14 @@ const courses = createSlice({
   initialState,
   reducers: {
     _saveCourses: (state, action) => {
+      // console.log(action.payload, "dfgfdgfh")
       const { data, total } = action.payload || {};
+
       return {
         ...state,
-        courses: data.courses || [],
+        courses: data?.courses || [],
         totalCourses: total || 0,
+        duration: data?.course_duration,
         loading: false,
       };
     },

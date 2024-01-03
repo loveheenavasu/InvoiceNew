@@ -3,7 +3,7 @@ import { AXIOS } from "./Setup";
 export const fetchStudents = (action) => {
   const params = {
     page: action?.payload?.page ? action?.payload?.page : 1,
-    rows: action?.payload?.row ? action?.payload?.row : 10,
+    per_page: action?.payload?.row ? action?.payload?.row : 10,
     dropdown: action.dropdown > 0 ? 1 : 0,
   };
 

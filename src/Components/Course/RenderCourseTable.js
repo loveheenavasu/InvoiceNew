@@ -27,12 +27,13 @@ const columns = [
 
 export const RenderCourseTable = () => {
   const {loading, courses, totalCourses  } = useSelector((state) => state.Courses) || {};
+  console.log("ccccv",courses, totalCourses)
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [page, setPage] = React.useState(1);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [coursesData, setCoursesData] = React.useState([]);
-
+console.log("page",page)
   // React.useEffect(() => {
   //   dispatch(setLoading(true));
   //   dispatch({ type: GET_COURSES });
@@ -51,6 +52,7 @@ export const RenderCourseTable = () => {
   const handleChangePage = (event, newPage) => {
     setPage(++newPage);
   };
+  
 
   const deleteCourse = async (index) => {
     const course_id = courses[index].id;
@@ -82,9 +84,9 @@ export const RenderCourseTable = () => {
   React.useEffect(() => {
     const _courses = courses?.map((course) => {
       return {
-        name: course.name || "-",
-        duration: course.duration || "-",
-        fee: course.fee || "-",
+        name: course?.name || "-",
+        duration: course?.duration || "-",
+        fee: course?.fee || "-",
         actions: "",
       };
     });
@@ -145,14 +147,20 @@ export const RenderCourseTable = () => {
                     </TableRow>
                   );
                 })
-              : ""}
+              :  (
+                <TableRow>
+                  <TableCell colSpan={columns.length} style={{ color: '#888' }}>
+                    No Data is available
+                  </TableCell>
+                </TableRow>
+              )}
           </TableBody>
         </Table>
       </TableContainer>
       <TablePagination
         rowsPerPageOptions={[10, 25, 100]}
         component="div"
-        count={totalCourses}
+        count={totalCourses || 0}
         rowsPerPage={rowsPerPage}
         page={page - 1}
         onPageChange={handleChangePage}
