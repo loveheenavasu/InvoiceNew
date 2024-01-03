@@ -445,7 +445,7 @@ export default function CreateStudent() {
                       fullWidth
                       type="number"
                       id="after_discount_fee"
-                      label="After Discount Fee"
+                      label="Fee After Discount"
                       name="after_discount_fee"
                       autoComplete="after_discount_fee"
                       inputProps={{ sx: { height: 10, marginTop: 1 } }}

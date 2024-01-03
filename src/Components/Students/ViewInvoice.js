@@ -35,7 +35,6 @@ export const ViewInvoice = (props) => {
   const [data, setData] = useState();
   const [companyData, setCompanyData] = useState();
   const dispatch = useDispatch();
-  // const paymentListdata = useSelector((state) => state.Payment.paymentList);
 
   console.log("data", data);
 
@@ -73,19 +72,13 @@ export const ViewInvoice = (props) => {
   };
 
   const columns = [
-    // { id: "name", label: "Student Name", name: "ddddd" },
     { id: "course", label: "Course Name", name: "fffff" },
     { id: "duration", label: "Duration", name: "cccc" },
-    // { id: "Payment Type", label: "Payment Type", name: "eeee" },
     { id: "course fee", label: "Course Fee (Rs)", name: "ggggg" },
     { id: "discount", label: "Discount (%)", name: "ggggg" },
     { id: "total", label: "Total (Rs)", name: "ggggg" },
   ];
 
-  // const paidAmountColumn = [
-  //   { id: "data", label: "Data" },
-  //   { id: "amount", label: "Amount" },
-  // ];
   return (
     <ProtectedRoute>
       <Navbar />
@@ -108,13 +101,13 @@ export const ViewInvoice = (props) => {
               marginRight: 8,
               textAlign: "center",
               color: "#000000",
-              // fontWeight: 600,
               backgroundColor: "#cccccc",
             }}
             className="heading"
           >
             Invoice
           </Typography>
+          
           <Box
             sx={{
               marginLeft: 14,
@@ -148,43 +141,16 @@ export const ViewInvoice = (props) => {
               +91 {companyData[0]?.phone}
             </Typography>
           </Box>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              gap: "4%",
-              // marginTop: "12px",
-            }}
-            className="heading"
-          >
-            <Typography
-              sx={{
-                fontWeight: 700,
-              }}
-            >
-              {/* CIN: {companyData[0]?.cin} */}
-            </Typography>
-
-            <Typography
-              sx={{
-                fontWeight: 700,
-              }}
-            >
-              {/* GSTIN: {companyData[0]?.gstin} */}
-            </Typography>
-          </Box>
 
           <Box
             sx={{
               display: "flex",
               justifyContent: "space-between",
-              // alignItems: "end",
               mt: 1,
               marginRight: "4rem",
             }}
           >
             <Typography
-              // variant="h6"
               sx={{ marginLeft: 16, color: "#EF7CB5", fontWeight: 900 }}
             >
               Invoice Date:- {new Date(data.created_at).toLocaleString()}
@@ -196,17 +162,6 @@ export const ViewInvoice = (props) => {
               />
             </Tooltip>
           </Box>
-
-          {/* <Typography
-            sx={{
-              marginLeft: 16,
-              // marginTop: 3,
-              color: "#EF7CB5",
-              fontWeight: "600",
-            }}
-          >
-            Invoice Date:- {new Date(data.created_at).toLocaleString()}
-          </Typography> */}
           <Grid container spacing={2}>
             <Grid item xs={8}>
               <Box>
@@ -325,7 +280,6 @@ export const ViewInvoice = (props) => {
                 variant="h5"
                 sx={{ fontWeight: 600, color: "#585555", marginTop: 2 }}
               >
-                {/* Due Date :{data?.datainvoice?.[0]?.duedate} */}
               </Typography>
               <Typography
                 variant="h6"
@@ -395,35 +349,6 @@ export const ViewInvoice = (props) => {
           <Box className="invoice-view-total">
             <Box className="invoice-total">
               <Grid container spacing={2}>
-                {/* <Grid item sm={4.7}>
-                  <Typography
-                    variant="h5"
-                    sx={{
-                      fontWeight: 400,
-                      fontSize: "18px",
-                      // marginLeft: 9,
-                      marginTop: 1,
-                      color: "#37429A",
-                    }}
-                  >
-                    Subtotal
-                  </Typography>
-                </Grid>
-
-                <Grid item sm={6}>
-                  <Typography
-                    variant="h5"
-                    sx={{
-                      fontSize: "18px",
-                      fontWeight: 400,
-                      marginTop: 1,
-                      width: 103,
-                    }}
-                  >
-                    {JSON.parse(data?.course_data)?.fee}
-                  </Typography>
-                </Grid> */}
-
                 <Grid item>
                   <Typography
                     variant="h5"
@@ -438,17 +363,6 @@ export const ViewInvoice = (props) => {
                     Total Amount:- INR {data.after_discount_fee}
                   </Typography>
                 </Grid>
-                {/* <Grid item sm={6}>
-                  <Typography
-                    variant="h4"
-                    sx={{
-                      fontWeight: 600,
-                      color: "rgb(240 0 122)",
-                    }}
-                  >
-                    {JSON.parse(data?.course_data)?.fee}
-                  </Typography>
-                </Grid> */}
               </Grid>
             </Box>
           </Box>
