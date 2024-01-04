@@ -10,7 +10,6 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-
 import { useDispatch, useSelector } from "react-redux";
 import {  DELETE_COURSE, GET_COURSES } from "../../Store/Action_Constants";
 import Spinner from "../Spinner/Spinner";
@@ -27,17 +26,13 @@ const columns = [
 
 export const RenderCourseTable = () => {
   const {loading, courses, totalCourses  } = useSelector((state) => state.Courses) || {};
-  console.log("ccccv",courses, totalCourses)
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  
   const [page, setPage] = React.useState(1);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [coursesData, setCoursesData] = React.useState([]);
-console.log("page",page)
-  // React.useEffect(() => {
-  //   dispatch(setLoading(true));
-  //   dispatch({ type: GET_COURSES });
-  // }, [dispatch]);
+
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(+event.target.value);

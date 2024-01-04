@@ -10,13 +10,12 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { styled } from "@mui/material/styles";
-// import { viewInvoice } from "../../Services/Invoice_Services";
 import { viewInvoice } from "../../Services/Students_Services";
 import { useLocation } from "react-router-dom";
 import Tooltip from "@mui/material/Tooltip";
 import DownloadIcon from "@mui/icons-material/Download";
 import { setLoading } from "../../Store/Slices/Invoice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { DOWNLOAD_PDF } from "../../Store/Action_Constants";
 import Spinner from "../Spinner/Spinner";
 import { fetchSenderCompany } from "../../Services/Sender_Company_Info";
@@ -35,9 +34,9 @@ export const ViewInvoice = (props) => {
   const [data, setData] = useState();
   const [companyData, setCompanyData] = useState();
   const dispatch = useDispatch();
-
-  console.log("data", data);
-
+  const {loading} = useSelector((state) => state.invoices);
+  console.log("loading",loading)
+  
   useEffect(() => {
     const fetchViewInvoiceData = async () => {
       try {
@@ -107,7 +106,7 @@ export const ViewInvoice = (props) => {
           >
             Invoice
           </Typography>
-          
+
           <Box
             sx={{
               marginLeft: 14,
@@ -151,23 +150,25 @@ export const ViewInvoice = (props) => {
             }}
           >
             <Typography
-              sx={{ marginLeft: 16, color: "#EF7CB5", fontWeight: 900 }}
+              sx={{ marginLeft: 18, color: "#EF7CB5", fontWeight: 900 }}
             >
               Invoice Date:- {new Date(data.created_at).toLocaleString()}
             </Typography>
-            <Tooltip title="Download Invoice">
-              <DownloadIcon
-                className="cursor_pointer"
-                onClick={() => downloadInvoice()}
-              />
-            </Tooltip>
+            <div>
+              <Tooltip title="Download Invoice">
+                <DownloadIcon
+                  onClick={() => downloadInvoice()}
+                  className="cursor_pointer"
+                />
+              </Tooltip>
+            </div>
           </Box>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} sx={{ marginTop: 1.5, ml: 0.2 }}>
             <Grid item xs={8}>
               <Box>
                 <Typography
                   variant="h5"
-                  sx={{ fontWeight: 600, marginLeft: 16, marginTop: 1.5 }}
+                  sx={{ fontWeight: 600, marginLeft: 16 }}
                 >
                   Invoice for
                 </Typography>
@@ -267,7 +268,7 @@ export const ViewInvoice = (props) => {
               </Box>
             </Grid>
             <Grid item xs={4}>
-              <Typography variant="h5" sx={{ fontWeight: 600, mt: 1.5 }}>
+              <Typography variant="h5" sx={{ fontWeight: 600 }}>
                 Invoice #
               </Typography>
               <Typography variant="h6" sx={{ color: "gray", marginTop: 1 }}>
@@ -279,8 +280,7 @@ export const ViewInvoice = (props) => {
               <Typography
                 variant="h5"
                 sx={{ fontWeight: 600, color: "#585555", marginTop: 2 }}
-              >
-              </Typography>
+              ></Typography>
               <Typography
                 variant="h6"
                 sx={{ color: "gray", marginTop: 1 }}
@@ -360,7 +360,7 @@ export const ViewInvoice = (props) => {
                       // marginRight: 0,
                     }}
                   >
-                    Total Amount:- INR {data.after_discount_fee}
+                    Total Amount Received:- INR {data.deposit_amount}
                   </Typography>
                 </Grid>
               </Grid>
@@ -373,7 +373,7 @@ export const ViewInvoice = (props) => {
             justifyContent="center"
           >
             <Box p={2} maxWidth="700px">
-              <Typography  sx={{fontSize:'15px'}} gutterBottom>
+              <Typography sx={{ fontSize: "15px" }} gutterBottom>
                 If you have any questions or concerns about this invoice, please
                 contact us at +91 {companyData[0]?.phone}.
               </Typography>
@@ -388,8 +388,8 @@ export const ViewInvoice = (props) => {
                   color: "#555",
                 }}
               >
-                [<b>Note:</b> This is a computer-generated invoice,
-                there is no need for a signature.]
+                [<b>Note:</b> This is a computer-generated invoice, there is no
+                need for a signature.]
               </Typography>
 
               <Typography

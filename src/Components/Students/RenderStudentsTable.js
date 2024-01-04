@@ -151,8 +151,9 @@ export const RenderStudentsTable = () => {
                     <TableRow hover role="checkbox" tabIndex={-1} key={index}>
                       {columns.map((column) => {
                         let value = row[column.id];
+                        console.log("column.align",column.align)
                         return (
-                          <TableCell key={column.id} align={column.align}>
+                          <TableCell key={column.id} >
                             {column.id === "actions" ? (
                               <Box sx={{ display: "flex" }}>
                                 <Tooltip title="Update Invoice">

@@ -108,10 +108,13 @@ function* updateInvoice(action) {
 function* downloadPdf(action) {
   try {
     const response = yield call(_downloadPdf, action?.payload);
-    window.open(response?.data?.url);
-    yield put(setPDFUrl(response?.data?.url));
+    yield put(setLoading(true));
 
-      yield put(setLoading(false));
+    if(response.status === 200){
+      window.open(response?.data?.url);
+      yield put(setPDFUrl(response?.data?.url));
+    }
+
   } catch (e) {
     toast.error(e?.response?.error || e?.response?.message);
     yield put(setLoading(false));

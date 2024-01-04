@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "./Components/LoginPage/LoginPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
 import { Invoice } from "./Components/Invoice/Invoice";
 import { CreateInvoice } from "./Components/Invoice/CreateInvoice";
 import { ViewInvoice } from "./Components/Students/ViewInvoice";

@@ -37,7 +37,10 @@ function* updateSenderCompany(action) {
   try {
     const response = yield call(modifySenderCompany, action);
     toast.success("Company info has been updated successfully");
-    if (response?.data) yield put(_saveSenderCompany(action?.payload));
+    if (response?.data) {
+      yield put(_saveSenderCompany(action?.payload))
+      yield put ({type: GET_SENDER_COMPANY})
+    };
   } catch (e) {
     toast.error(e?.response?.data?.error || e?.response?.data?.message);
     yield put(setLoading(false));

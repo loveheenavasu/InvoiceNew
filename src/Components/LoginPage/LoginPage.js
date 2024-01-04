@@ -19,9 +19,7 @@ const theme = createTheme();
 
 export default function LoginPage() {
   const { user, token, loading, success } = useSelector((state) => state.auth);
-  const data = useSelector((state) => state.auth);
 
-  console.log("rethryt",data)
   const navigate = useNavigate();
   const dispatch = useDispatch();
 

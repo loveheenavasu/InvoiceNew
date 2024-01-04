@@ -16,14 +16,9 @@ export const Navbar = () => {
   useEffect(() => {
     const isSender = localStorage.getItem("sender");
     setIsSenderAvailable(isSender);
-
     const is_login = localStorage.getItem("token");
     is_login ? setIsLogin(true) : setIsLogin(false);
   }, []);
-
-  // const handleClose = () => {
-  //   setAnchorEl(null);
-  // };
 
   const handleClick = () => {
     setAnchorEl(null);

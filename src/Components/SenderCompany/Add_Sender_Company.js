@@ -231,7 +231,6 @@ export default function Add_Sender_Company() {
                     onChange={handleInput}
                     value={senderCompany?.cin}
                   />
-                  {/* <Typography className="errorStyle">{error.phone}</Typography> */}
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
@@ -246,9 +245,9 @@ export default function Add_Sender_Company() {
                     onChange={handleInput}
                     value={senderCompany?.gstin}
                   />
-                  {/* <Typography className="errorStyle">{error.phone}</Typography> */}
                 </Grid>
-                <Grid item xs={12}>
+
+                <Grid item xs={12} sm={6}>
                   <TextField
                     required
                     fullWidth
@@ -261,7 +260,7 @@ export default function Add_Sender_Company() {
                     value={senderCompany?.acc_number}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     required
                     fullWidth

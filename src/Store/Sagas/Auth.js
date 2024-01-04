@@ -4,13 +4,10 @@ import { toast } from "react-toastify";
 import { LOGIN_USER } from "../Action_Constants";
 import { handleUserLogin, setLoading } from "../Slices/Auth";
 import { loginRequest } from "../../Services/Auth_Services";
-import { useDispatch } from "react-redux";
 
 function* loginUser(action) {
   try {
     const response = yield call(loginRequest, action);
-    console.log("response",response)
-
     yield put(handleUserLogin(response?.data));
   } catch (e) {
     toast.error(e?.response?.data?.error || e?.response?.data?.message);

@@ -55,6 +55,7 @@ const invoices = createSlice({
       return {
         ...state,
         pdfUrl: action?.payload,
+        loading: false
       };
     },
     setCourseDuration: (state, action) => {

@@ -14,7 +14,6 @@ const courses = createSlice({
   initialState,
   reducers: {
     _saveCourses: (state, action) => {
-      // console.log(action.payload, "dfgfdgfh")
       const { data, total } = action.payload || {};
 
       return {
