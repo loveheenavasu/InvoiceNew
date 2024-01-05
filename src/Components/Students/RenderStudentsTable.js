@@ -65,9 +65,12 @@ export const RenderStudentsTable = () => {
     dispatch({ type: GET_STUDENTS, payload: { page: page, row: rowsPerPage } });
   }, [dispatch, page, rowsPerPage]);
 
-  const handleChangePage = (event, newPage) => {
-    setPage(++newPage);
-  };
+  const handleChangePage = React.useCallback(
+    (event, newPage) => {
+      setPage(++newPage);
+    },
+    [setPage]
+  );
 
   const deleteStudent = async (index) => {
     const student_id = students[index].id;
@@ -88,6 +91,16 @@ export const RenderStudentsTable = () => {
     dispatch(setLoading(true));
     dispatch({ type: DELETE_STUDENT, payload: payload });
   };
+
+  React.useEffect(() => {
+    const totalPages = Math.ceil(totalStudents / rowsPerPage) - 1;
+
+    if (totalPages === 0) {
+      handleChangePage(null, 0);
+    } else if (page > totalPages) {
+      handleChangePage(null, totalPages);
+    }
+  }, [totalStudents, rowsPerPage, page, handleChangePage]);
 
   const editStudent = (index) => {
     localStorage.setItem("studentcreating", true);
@@ -145,60 +158,60 @@ export const RenderStudentsTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {studentsData?.length > 0
-              ? studentsData?.map((row, index) => {
-                  return (
-                    <TableRow hover role="checkbox" tabIndex={-1} key={index}>
-                      {columns.map((column) => {
-                        let value = row[column.id];
-                        return (
-                          <TableCell key={column.id} >
-                            {column.id === "actions" ? (
-                              <Box sx={{ display: "flex" }}>
-                                <Tooltip title="Update Invoice">
-                                  <EditIcon
-                                    className="cursor_pointer"
-                                    onClick={() => editStudent(index)}
-                                  />
-                                </Tooltip>
-                                &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;
-                                <Tooltip title="Delete Invoice">
-                                  <DeleteForeverIcon
-                                    onClick={() => deleteStudent(index)}
-                                    className="cursor_pointer"
-                                  />
-                                </Tooltip>
-                                &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;
-                                <Tooltip title="View Invoice">
-                                  <VisibilityIcon
-                                    className="cursor_pointer"
-                                    onClick={() => viewInvoice(index)}
-                                  />
-                                </Tooltip>
-                                &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;
-                                <Tooltip title="Download Invoice">
-                                  <DownloadIcon
-                                    className="cursor_pointer"
-                                    onClick={() => downloadInvoicePdf(index)}
-                                  />
-                                </Tooltip>
-                              </Box>
-                            ) : (
-                              value
-                            )}
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  );
-                })
-              :  (
-                <TableRow>
-                  <TableCell colSpan={columns.length} style={{ color: '#888' }}>
-                    No Data is available
-                  </TableCell>
-                </TableRow>
-              )}
+            {studentsData?.length > 0 ? (
+              studentsData?.map((row, index) => {
+                return (
+                  <TableRow hover role="checkbox" tabIndex={-1} key={index}>
+                    {columns.map((column) => {
+                      let value = row[column.id];
+                      return (
+                        <TableCell key={column.id}>
+                          {column.id === "actions" ? (
+                            <Box sx={{ display: "flex" }}>
+                              <Tooltip title="Update Invoice">
+                                <EditIcon
+                                  className="cursor_pointer"
+                                  onClick={() => editStudent(index)}
+                                />
+                              </Tooltip>
+                              &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;
+                              <Tooltip title="Delete Invoice">
+                                <DeleteForeverIcon
+                                  onClick={() => deleteStudent(index)}
+                                  className="cursor_pointer"
+                                />
+                              </Tooltip>
+                              &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;
+                              <Tooltip title="View Invoice">
+                                <VisibilityIcon
+                                  className="cursor_pointer"
+                                  onClick={() => viewInvoice(index)}
+                                />
+                              </Tooltip>
+                              &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;
+                              <Tooltip title="Download Invoice">
+                                <DownloadIcon
+                                  className="cursor_pointer"
+                                  onClick={() => downloadInvoicePdf(index)}
+                                />
+                              </Tooltip>
+                            </Box>
+                          ) : (
+                            value
+                          )}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                );
+              })
+            ) : (
+              <TableRow >
+                <TableCell colSpan={columns.length} style={{ color: "#888"}}>
+                  No Data is available
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </TableContainer>

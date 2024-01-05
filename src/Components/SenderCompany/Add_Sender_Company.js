@@ -31,8 +31,8 @@ export default function Add_Sender_Company() {
     address: "",
     phone: "",
     pan_number: "",
-    cin: "",
-    gstin: "",
+    register_no: "",
+    // gstin: "",
     bank_name: "",
     acc_holder: "",
     acc_number: "",
@@ -63,14 +63,15 @@ export default function Add_Sender_Company() {
       email: senderCompany.email,
       address: senderCompany.address,
       phone: senderCompany.phone,
-      cin: senderCompany.cin,
-      gstin: senderCompany.gstin,
+      register_no: senderCompany.register_no,
+      // gstin: senderCompany.gstin,
       pan_number: senderCompany.pan_number,
       acc_number: senderCompany.acc_number,
       acc_holder: senderCompany.acc_holder,
       bank_name: senderCompany.bank_name,
       ifsc: senderCompany.ifsc,
     };
+
     if (!isValidPayload) {
       toast.error("Please fill all the fields", {
         toastId: "sender_form",
@@ -78,7 +79,6 @@ export default function Add_Sender_Company() {
       return;
     }
     dispatch(setLoading(true));
-
     if (isSenderExist) {
       payload.id = sender_company.id;
       dispatch({
@@ -218,21 +218,21 @@ export default function Add_Sender_Company() {
                     value={senderCompany?.pan_number}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={12}>
                   <TextField
                     required
                     fullWidth
                     id="cin"
-                    label="Cin"
+                    label="Registration Number"
                     type="number"
-                    name="cin"
+                    name="register_no"
                     autoComplete="cin"
                     inputProps={{ sx: { height: 10, marginTop: 1 } }}
                     onChange={handleInput}
-                    value={senderCompany?.cin}
+                    value={senderCompany?.register_no}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                {/* <Grid item xs={12} sm={6}>
                   <TextField
                     required
                     fullWidth
@@ -245,7 +245,7 @@ export default function Add_Sender_Company() {
                     onChange={handleInput}
                     value={senderCompany?.gstin}
                   />
-                </Grid>
+                </Grid> */}
 
                 <Grid item xs={12} sm={6}>
                   <TextField

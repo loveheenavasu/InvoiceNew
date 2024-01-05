@@ -20,7 +20,7 @@ import { useNavigate } from "react-router-dom";
 const columns = [
   { id: "name", label: "Course Name", minWidth: 180 },
   { id: "duration", label: "Course Duration", minWidth: 180 },
-  { id: "fee", label: "Course Fee", minWidth: 180 },
+  { id: "fee", label: "Course Fee (Rs)", minWidth: 180 },
   { id: "actions", label: "ACTIONS", minWidth: 100 },
 ];
 
@@ -44,10 +44,9 @@ export const RenderCourseTable = () => {
     dispatch({ type: GET_COURSES, payload: { page: page, row: rowsPerPage } });
   }, [dispatch, page, rowsPerPage]);
 
-  const handleChangePage = (event, newPage) => {
+  const handleChangePage = React.useCallback((event, newPage) => {
     setPage(++newPage);
-  };
-  
+  }, [setPage]);
 
   const deleteCourse = async (index) => {
     const course_id = courses[index].id;
@@ -68,6 +67,17 @@ export const RenderCourseTable = () => {
     dispatch(setLoading(true));
     dispatch({ type: DELETE_COURSE, payload: payload });
   };
+
+  React.useEffect(() => {
+    const totalPages = Math.ceil(totalCourses / rowsPerPage) - 1;
+
+    if (totalPages === 0) {
+      handleChangePage(null, 0);
+    } else if (page > totalPages) {
+      handleChangePage(null, totalPages);
+    }
+  }, [totalCourses, rowsPerPage, page, handleChangePage]);
+  
 
   const editCourse = (index) => {
     localStorage.setItem("coursecreating", true);

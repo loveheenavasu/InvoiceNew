@@ -1,4 +1,4 @@
-import React, { useEffect} from "react";
+import React, { useEffect } from "react";
 import { Navbar } from "../Navbar/Navbar";
 import { Footer } from "../Footer/Footer";
 import ProtectedRoute from "../../Routes/ProtectedRoute";
@@ -37,6 +37,7 @@ export const ViewInvoice = (props) => {
     (state) => state.senderCompanyInfo
   );
   const { loading, student: data } = useSelector((state) => state.Students);
+
   useEffect(() => {
     dispatch(setLoading(true));
     dispatch({ type: GET_STUDENT, payload: location.state.invoice_id });
@@ -60,6 +61,19 @@ export const ViewInvoice = (props) => {
     { id: "total", label: "Total (Rs)", name: "ggggg" },
   ];
 
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    const formattedMonth = new Intl.DateTimeFormat("en-US", {
+      month: "2-digit",
+    }).format(date);
+
+    const formattedYear = new Intl.DateTimeFormat("en-US", {
+      year: "2-digit",
+    }).format(date);
+
+    return `${formattedMonth}-${formattedYear}`;
+  }
+
   return (
     <ProtectedRoute>
       <Navbar />
@@ -75,20 +89,6 @@ export const ViewInvoice = (props) => {
               marginRight: 8,
             }}
           />
-          <Typography
-            variant="h5"
-            sx={{
-              fontWeight: 500,
-              marginLeft: 14,
-              marginRight: 8,
-              textAlign: "center",
-              color: "#000000",
-              backgroundColor: "#cccccc",
-            }}
-            className="heading"
-          >
-            Invoice
-          </Typography>
 
           <Box
             sx={{
@@ -146,8 +146,9 @@ export const ViewInvoice = (props) => {
               </Tooltip>
             </div>
           </Box>
+
           <Grid container spacing={2} sx={{ marginTop: 1.5, ml: 0.2 }}>
-            <Grid item xs={8}>
+            <Grid item xs={7.5}>
               <Box>
                 <Typography
                   variant="h5"
@@ -226,15 +227,35 @@ export const ViewInvoice = (props) => {
               </Box>
             </Grid>
             <Grid item xs={4}>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: 500,
+                  fontSize: "22px",
+                  // marginTop: 1,
+                  color: "#66666C",
+                }}
+              >
+                <Typography
+                  variant="h5"
+                  sx={{
+                    display: "inline",
+                    fontWeight: 600,
+                    color: "black",
+                  }}
+                >
+                  Registration # {""}
+                </Typography>
+                {companyData[0]?.register_no}
+              </Typography>
+
               <Typography variant="h5" sx={{ fontWeight: 600 }}>
                 Invoice #
               </Typography>
               <Typography variant="h6" sx={{ color: "gray", marginTop: 1 }}>
-                {`ZSPL/${new Date(data.created_at).toLocaleDateString("en-US", {
-                  year: "2-digit",
-                  month: "numeric",
-                })}/${data.id}`}
+                {`ZT/${formatDate(data.created_at)}/00${data.id}`}
               </Typography>
+
               <Typography
                 variant="h5"
                 sx={{ fontWeight: 600, color: "#585555", marginTop: 2 }}
@@ -313,7 +334,7 @@ export const ViewInvoice = (props) => {
                     sx={{
                       fontWeight: 800,
                       fontSize: "22px",
-                      marginTop: 1,
+                      marginTop: 2,
                       color: "#EF7CB5",
                       // marginRight: 0,
                     }}
@@ -329,9 +350,13 @@ export const ViewInvoice = (props) => {
             flexDirection="column"
             alignItems="center"
             justifyContent="center"
+            mt={5}
           >
             <Box p={2} maxWidth="700px">
-              <Typography sx={{ fontSize: "15px" }} gutterBottom>
+              <Typography
+                sx={{ fontSize: "12px", textAlign: "center" }}
+                gutterBottom
+              >
                 If you have any questions or concerns about this invoice, please
                 contact us at +91 {companyData[0]?.phone}.
               </Typography>
@@ -342,8 +367,10 @@ export const ViewInvoice = (props) => {
                 variant="body2"
                 style={{
                   fontStyle: "italic",
-                  marginTop: "16px",
+                  marginTop: "10px",
                   color: "#555",
+                  textAlign: "center",
+                  fontSize: "12px",
                 }}
               >
                 [<b>Note:</b> This is a computer-generated invoice, there is no
@@ -354,8 +381,10 @@ export const ViewInvoice = (props) => {
                 variant="body1"
                 style={{
                   fontStyle: "italic",
-                  marginTop: "16px",
+                  marginTop: "10px",
                   color: "#007BFF",
+                  textAlign: "center",
+                  fontSize: "12px",
                 }}
               >
                 Thank you for choosing {companyData[0]?.name}!

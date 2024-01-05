@@ -187,7 +187,7 @@ export default function CreateCourse() {
                       label="Courseduration"
                       onChange={handleInput}
                     >
-                      <MenuItem value="3 Months">3 Months</MenuItem>
+                      <MenuItem value="3-4 Months">3-4 Months</MenuItem>
                       <MenuItem value="6 Months">6 Months</MenuItem>
                     </Select>
                   </FormControl>
@@ -199,14 +199,13 @@ export default function CreateCourse() {
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
-                    // type="number"
+                    type="number"
                     required
                     fullWidth
                     id="Coursefee"
                     label="Course Fee"
                     name="fee"
                     autoComplete="Coursefee"
-                    // inputProps={{ sx: { height: 10, marginTop: 1 } }}
                     value={courseInfo.fee}
                     onChange={handleInput}
                   />
