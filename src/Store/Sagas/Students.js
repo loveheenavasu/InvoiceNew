@@ -1,9 +1,10 @@
 import {
   fetchStudents,
-  fetchSingleStudent,
   removeStudent,
   editStudent,
   createStudent,
+  viewInvoice,
+  _downloadPdf,
 } from "../../Services/Students_Services";
 import {
   GET_STUDENTS,
@@ -11,12 +12,14 @@ import {
   UPDATE_STUDENT,
   SAVE_STUDENT,
   GET_STUDENT,
+  DOWNLOAD_PDF,
 } from "../Action_Constants";
 import {
   _saveStudents,
   _saveStudent,
   setLoading,
   studentCreated,
+  setPDFUrl,
 } from "../Slices/Students";
 import { takeLatest, put, call } from "redux-saga/effects";
 import { toast } from "react-toastify";
@@ -33,10 +36,10 @@ function* getStudents(action) {
 
 function* getStudent(action) {
   try {
-    const response = yield call(fetchSingleStudent, action.payload);
+    const response = yield call(viewInvoice, action.payload);
     yield put(_saveStudent(response?.data?.data));
   } catch (e) {
-    toast.error(e?.response?.data?.error?.[0] || e?.response?.data?.message);
+    toast.error(e?.response?.statusText || e?.response?.data?.message);
     yield put(setLoading(false));
   }
 }
@@ -104,10 +107,27 @@ function* updateStudent(action) {
   }
 }
 
+function* downloadPdf(action) {
+  try {
+    const response = yield call(_downloadPdf, action?.payload);
+    yield put(setLoading(true));
+
+    if(response.status === 200){
+      window.open(response?.data?.url);
+      yield put(setPDFUrl(response?.data?.url));
+    }
+
+  } catch (e) {
+    toast.error(e?.response?.error || e?.response?.message);
+    yield put(setLoading(false));
+  }
+}
+
 export function* studentsSaga() {
   yield takeLatest(GET_STUDENTS, getStudents);
   yield takeLatest(DELETE_STUDENT, deleteStudent);
   yield takeLatest(SAVE_STUDENT, saveStudent);
+  yield takeLatest(DOWNLOAD_PDF, downloadPdf);
   yield takeLatest(UPDATE_STUDENT, updateStudent);
   yield takeLatest(GET_STUDENT, getStudent);
 }

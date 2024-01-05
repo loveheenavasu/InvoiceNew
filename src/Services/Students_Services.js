@@ -24,6 +24,9 @@ export const viewInvoice = (action) => {
 export const editStudent = (action) => {
   return AXIOS.put(`update-student/${action.payload.id}`,(action.payload) );
 };
+export const _downloadPdf = (action) => {
+  return AXIOS.get(`download-invoice/${action}`);
+};
 
 export const fetchSingleStudent = (action) => {
   return AXIOS.get(`view-student/${action}`);

@@ -4,7 +4,8 @@ const initialState = {
   students: [],
   loading: false,
   studentCreating: false,
-  student: {},
+  student: [],
+  pdfUrl: "",
   totalStudents: 0,
 };
 
@@ -47,6 +48,13 @@ const students = createSlice({
         studentCreating: action?.payload,
       };
     },
+    setPDFUrl: (state, action) => {
+      return {
+        ...state,
+        pdfUrl: action?.payload,
+        loading: false
+      };
+    },
   },
 });
 
@@ -56,5 +64,6 @@ export const {
   studentCreated,
   studentCreating,
   _saveStudent,
+  setPDFUrl,
 } = students.actions;
 export default students.reducer;

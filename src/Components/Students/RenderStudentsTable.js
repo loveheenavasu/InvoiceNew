@@ -101,7 +101,7 @@ export const RenderStudentsTable = () => {
   };
   const downloadInvoicePdf = (index) => {
     const invoice_id = students[index].id;
-    // dispatch(setLoading(true));
+    dispatch(setLoading(true));
     dispatch({ type: DOWNLOAD_PDF, payload: invoice_id });
   };
 
@@ -151,7 +151,6 @@ export const RenderStudentsTable = () => {
                     <TableRow hover role="checkbox" tabIndex={-1} key={index}>
                       {columns.map((column) => {
                         let value = row[column.id];
-                        console.log("column.align",column.align)
                         return (
                           <TableCell key={column.id} >
                             {column.id === "actions" ? (

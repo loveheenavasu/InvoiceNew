@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect} from "react";
 import { Navbar } from "../Navbar/Navbar";
 import { Footer } from "../Footer/Footer";
 import ProtectedRoute from "../../Routes/ProtectedRoute";
@@ -10,16 +10,17 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { styled } from "@mui/material/styles";
-import { viewInvoice } from "../../Services/Students_Services";
 import { useLocation } from "react-router-dom";
 import Tooltip from "@mui/material/Tooltip";
 import DownloadIcon from "@mui/icons-material/Download";
-import { setLoading } from "../../Store/Slices/Invoice";
+import { setLoading } from "../../Store/Slices/Students";
 import { useDispatch, useSelector } from "react-redux";
-import { DOWNLOAD_PDF } from "../../Store/Action_Constants";
+import {
+  DOWNLOAD_PDF,
+  GET_SENDER_COMPANY,
+  GET_STUDENT,
+} from "../../Store/Action_Constants";
 import Spinner from "../Spinner/Spinner";
-import { fetchSenderCompany } from "../../Services/Sender_Company_Info";
-import { toast } from "react-toastify";
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
   "&:nth-of-type(odd)": {
@@ -31,38 +32,19 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 export const ViewInvoice = (props) => {
   const location = useLocation();
-  const [data, setData] = useState();
-  const [companyData, setCompanyData] = useState();
   const dispatch = useDispatch();
-  const {loading} = useSelector((state) => state.invoices);
-  console.log("loading",loading)
-  
+  const { senderCompany: companyData } = useSelector(
+    (state) => state.senderCompanyInfo
+  );
+  const { loading, student: data } = useSelector((state) => state.Students);
   useEffect(() => {
-    const fetchViewInvoiceData = async () => {
-      try {
-        const invoiceData = await viewInvoice(location.state.invoice_id);
-        setData(invoiceData?.data?.data);
-      } catch (error) {
-        toast.error(error.message);
-        console.error("Error fetching invoice data", error);
-      }
-    };
-
-    fetchViewInvoiceData();
-  }, [location.state.invoice_id]);
+    dispatch(setLoading(true));
+    dispatch({ type: GET_STUDENT, payload: location.state.invoice_id });
+  }, [dispatch, location.state.invoice_id]);
 
   useEffect(() => {
-    const fetchCompanyData = async () => {
-      try {
-        const companyData = await fetchSenderCompany();
-        setCompanyData(companyData?.data?.data);
-      } catch (error) {
-        console.error("Error fetching invoice data", error);
-      }
-    };
-
-    fetchCompanyData();
-  }, []);
+    dispatch({ type: GET_SENDER_COMPANY });
+  }, [dispatch]);
 
   const downloadInvoice = () => {
     const invoice_id = location.state.invoice_id;
@@ -81,8 +63,9 @@ export const ViewInvoice = (props) => {
   return (
     <ProtectedRoute>
       <Navbar />
-
-      {data && companyData ? (
+      {loading ? (
+        <Spinner loading={true} />
+      ) : (
         <Container className="invoice-container">
           <Divider
             sx={{
@@ -240,31 +223,6 @@ export const ViewInvoice = (props) => {
                   </Typography>
                   {data?.email}
                 </Typography>
-                <Typography
-                  variant="h5"
-                  sx={{
-                    fontWeight: 500,
-                    fontSize: "18px",
-                    marginTop: 1,
-                    marginLeft: "8rem",
-                    color: "#66666C",
-                  }}
-                >
-                  {data?.datainvoice?.[0]?.client_detail?.pin}
-                </Typography>
-                <Typography
-                  variant="h5"
-                  sx={{
-                    fontWeight: 500,
-                    fontSize: "18px",
-                    marginTop: 1,
-                    marginLeft: "8rem",
-
-                    color: "#66666C",
-                  }}
-                >
-                  {data?.datainvoice?.[0]?.client_detail?.pan}
-                </Typography>
               </Box>
             </Grid>
             <Grid item xs={4}>
@@ -405,9 +363,8 @@ export const ViewInvoice = (props) => {
             </Box>
           </Box>
         </Container>
-      ) : (
-        <Spinner loading={true} />
       )}
+
       <Footer />
     </ProtectedRoute>
   );
