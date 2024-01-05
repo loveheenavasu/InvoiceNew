@@ -62,17 +62,15 @@ export const ViewInvoice = (props) => {
   ];
 
   function formatDate(dateString) {
+    console.log("dateString", dateString);
+  
     const date = new Date(dateString);
-    const formattedMonth = new Intl.DateTimeFormat("en-US", {
-      month: "2-digit",
-    }).format(date);
-
-    const formattedYear = new Intl.DateTimeFormat("en-US", {
-      year: "2-digit",
-    }).format(date);
-
-    return `${formattedMonth}-${formattedYear}`;
+    const formattedMonth = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const formattedYear = String(date.getUTCFullYear()).slice(-2);
+  
+    return `${formattedMonth}/${formattedYear}`;
   }
+  
 
   return (
     <ProtectedRoute>
@@ -253,7 +251,7 @@ export const ViewInvoice = (props) => {
                 Invoice #
               </Typography>
               <Typography variant="h6" sx={{ color: "gray", marginTop: 1 }}>
-                {`ZT/${formatDate(data.created_at)}/00${data.id}`}
+                {`ZT/${formatDate(data?.created_at)}/00${data?.id}`}
               </Typography>
 
               <Typography
