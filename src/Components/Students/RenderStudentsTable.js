@@ -72,6 +72,15 @@ export const RenderStudentsTable = () => {
     [setPage]
   );
 
+  React.useEffect(() => {
+    const currentPageDataStart = (page - 1) * rowsPerPage;
+    const currentPageDataEnd = Math.min(page * rowsPerPage, totalStudents);
+
+    if (currentPageDataStart >= currentPageDataEnd) {
+      setPage(1);
+    }
+  }, [totalStudents, rowsPerPage, page, setPage]);
+
   const deleteStudent = async (index) => {
     const student_id = students[index].id;
     const payload = {
@@ -92,15 +101,15 @@ export const RenderStudentsTable = () => {
     dispatch({ type: DELETE_STUDENT, payload: payload });
   };
 
-  React.useEffect(() => {
-    const totalPages = Math.ceil(totalStudents / rowsPerPage) - 1;
+  // React.useEffect(() => {
+  //   const totalPages = Math.ceil(totalStudents / rowsPerPage) - 1;
 
-    if (totalPages === 0) {
-      handleChangePage(null, 0);
-    } else if (page > totalPages) {
-      handleChangePage(null, totalPages);
-    }
-  }, [totalStudents, rowsPerPage, page, handleChangePage]);
+  //   if (totalPages === 0) {
+  //     handleChangePage(null, 0);
+  //   } else if (page > totalPages) {
+  //     handleChangePage(null, totalPages);
+  //   }
+  // }, [totalStudents, rowsPerPage, page, handleChangePage]);
 
   const editStudent = (index) => {
     localStorage.setItem("studentcreating", true);
@@ -206,8 +215,8 @@ export const RenderStudentsTable = () => {
                 );
               })
             ) : (
-              <TableRow >
-                <TableCell colSpan={columns.length} style={{ color: "#888"}}>
+              <TableRow>
+                <TableCell colSpan={columns.length} style={{ color: "#888" }}>
                   No Data is available
                 </TableCell>
               </TableRow>

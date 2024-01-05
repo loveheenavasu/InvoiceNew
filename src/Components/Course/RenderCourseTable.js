@@ -11,9 +11,9 @@ import TableRow from "@mui/material/TableRow";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { useDispatch, useSelector } from "react-redux";
-import {  DELETE_COURSE, GET_COURSES } from "../../Store/Action_Constants";
+import { DELETE_COURSE, GET_COURSES } from "../../Store/Action_Constants";
 import Spinner from "../Spinner/Spinner";
-import {courseCreating, setLoading} from "../../Store/Slices/Courses"
+import { courseCreating, setLoading } from "../../Store/Slices/Courses";
 import swal from "sweetalert";
 import { useNavigate } from "react-router-dom";
 
@@ -25,14 +25,14 @@ const columns = [
 ];
 
 export const RenderCourseTable = () => {
-  const {loading, courses, totalCourses  } = useSelector((state) => state.Courses) || {};
+  const { loading, courses, totalCourses } =
+    useSelector((state) => state.Courses) || {};
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
+
   const [page, setPage] = React.useState(1);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [coursesData, setCoursesData] = React.useState([]);
-
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(+event.target.value);
@@ -42,11 +42,23 @@ export const RenderCourseTable = () => {
   React.useEffect(() => {
     dispatch(setLoading(true));
     dispatch({ type: GET_COURSES, payload: { page: page, row: rowsPerPage } });
-  }, [dispatch, page, rowsPerPage]);
+  }, [page, rowsPerPage,dispatch]);
 
-  const handleChangePage = React.useCallback((event, newPage) => {
-    setPage(++newPage);
-  }, [setPage]);
+  const handleChangePage = React.useCallback(
+    (event, newPage) => {
+      setPage(++newPage);
+    },
+    [setPage]
+  );
+
+  React.useEffect(() => {
+    const currentPageDataStart = (page - 1) * rowsPerPage;
+    const currentPageDataEnd = Math.min(page * rowsPerPage, totalCourses);
+
+    if (currentPageDataStart >= currentPageDataEnd) {
+      setPage(1);
+    }
+  }, [totalCourses, rowsPerPage, page, setPage]);
 
   const deleteCourse = async (index) => {
     const course_id = courses[index].id;
@@ -68,16 +80,14 @@ export const RenderCourseTable = () => {
     dispatch({ type: DELETE_COURSE, payload: payload });
   };
 
-  React.useEffect(() => {
-    const totalPages = Math.ceil(totalCourses / rowsPerPage) - 1;
-
-    if (totalPages === 0) {
-      handleChangePage(null, 0);
-    } else if (page > totalPages) {
-      handleChangePage(null, totalPages);
-    }
-  }, [totalCourses, rowsPerPage, page, handleChangePage]);
-  
+  // React.useEffect(() => {
+  //   const totalPages = Math.ceil(totalCourses / rowsPerPage) - 1;
+  //   if (totalPages === 0) {
+  //     handleChangePage(null, 0);
+  //   } else if (page > totalPages) {
+  //     handleChangePage(null, totalPages);
+  //   }
+  // }, [totalCourses, rowsPerPage, page, handleChangePage]);
 
   const editCourse = (index) => {
     localStorage.setItem("coursecreating", true);
@@ -117,48 +127,43 @@ export const RenderCourseTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {coursesData?.length > 0
-              ? coursesData?.map((row, index) => {
-                  return (
-                    <TableRow
-                      hover
-                      role="checkbox"
-                      tabIndex={-1}
-                      key={index}
-                    >
-                      {columns.map((column) => {
-                        let value = row[column.id];
-                        return (
-                          <TableCell key={column.id} align={column.align}>
-                            {column.id === "actions" ? (
-                              <Box sx={{ display: "flex" }}>
-                                <EditIcon
-                                  className="cursor_pointer"
-                                  onClick={() => editCourse(index)}
-                                />
-                                &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;&nbsp;
-                                &nbsp; &nbsp;
-                                <DeleteForeverIcon
-                                  onClick={() => deleteCourse(index)}
-                                  className="cursor_pointer"
-                                />
-                              </Box>
-                            ) : (
-                              value
-                            )}
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  );
-                })
-              :  (
-                <TableRow>
-                  <TableCell colSpan={columns.length} style={{ color: '#888' }}>
-                    No Data is available
-                  </TableCell>
-                </TableRow>
-              )}
+            {coursesData?.length > 0 ? (
+              coursesData?.map((row, index) => {
+                return (
+                  <TableRow hover role="checkbox" tabIndex={-1} key={index}>
+                    {columns.map((column) => {
+                      let value = row[column.id];
+                      return (
+                        <TableCell key={column.id} align={column.align}>
+                          {column.id === "actions" ? (
+                            <Box sx={{ display: "flex" }}>
+                              <EditIcon
+                                className="cursor_pointer"
+                                onClick={() => editCourse(index)}
+                              />
+                              &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;&nbsp;
+                              &nbsp; &nbsp;
+                              <DeleteForeverIcon
+                                onClick={() => deleteCourse(index)}
+                                className="cursor_pointer"
+                              />
+                            </Box>
+                          ) : (
+                            value
+                          )}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                );
+              })
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} style={{ color: "#888" }}>
+                  No Data is available
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </TableContainer>

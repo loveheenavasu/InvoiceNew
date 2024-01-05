@@ -61,13 +61,10 @@ export const ViewInvoice = (props) => {
     { id: "total", label: "Total (Rs)", name: "ggggg" },
   ];
 
-  function formatDate(dateString) {
-    console.log("dateString", dateString);
-  
+  function formatDate(dateString) {  
     const date = new Date(dateString);
     const formattedMonth = String(date.getUTCMonth() + 1).padStart(2, '0');
     const formattedYear = String(date.getUTCFullYear()).slice(-2);
-  
     return `${formattedMonth}/${formattedYear}`;
   }
   
