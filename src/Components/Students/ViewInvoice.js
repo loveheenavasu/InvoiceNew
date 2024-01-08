@@ -65,7 +65,7 @@ export const ViewInvoice = (props) => {
     const date = new Date(dateString);
     const formattedMonth = String(date.getUTCMonth() + 1).padStart(2, '0');
     const formattedYear = String(date.getUTCFullYear()).slice(-2);
-    return `${formattedMonth}/${formattedYear}`;
+    return `${formattedMonth}-${formattedYear}`;
   }
   
 

@@ -50,10 +50,7 @@ export const RenderStudentsTable = () => {
   const [page, setPage] = React.useState(1);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [studentsData, setStudentData] = React.useState([]);
-  // React.useEffect(() => {
-  //   dispatch(setLoading(true));
-  //   dispatch({ type: GET_STUDENTS });
-  // }, [dispatch]);
+
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(+event.target.value);
@@ -80,6 +77,7 @@ export const RenderStudentsTable = () => {
       setPage(1);
     }
   }, [totalStudents, rowsPerPage, page, setPage]);
+
 
   const deleteStudent = async (index) => {
     const student_id = students[index].id;
