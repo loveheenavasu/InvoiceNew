@@ -5,6 +5,9 @@ import {
   createStudent,
   viewInvoice,
   _downloadPdf,
+  addPayment
+
+
 } from "../../Services/Students_Services";
 import {
   GET_STUDENTS,
@@ -13,6 +16,9 @@ import {
   SAVE_STUDENT,
   GET_STUDENT,
   DOWNLOAD_PDF,
+  ADD_PAYMENT,
+  VIEW_PAYMENTS,
+  FILTER_STUDENT
 } from "../Action_Constants";
 import {
   _saveStudents,
@@ -20,6 +26,8 @@ import {
   setLoading,
   studentCreated,
   setPDFUrl,
+  paymentList,
+  filterStudent,
 } from "../Slices/Students";
 import { takeLatest, put, call } from "redux-saga/effects";
 import { toast } from "react-toastify";
@@ -34,16 +42,40 @@ function* getStudents(action) {
   }
 }
 
+// function* getViewInvoice(action) {
+//   try {
+
+//     const response = yield call(viewInvoice, action);
+//     console.log("23435", response?.data);
+//     yield put(getInvoice(response?.data));
+//   } catch (e) {
+//     toast.error(e?.response?.data?.error || e?.response?.data?.message);
+//     yield put(setLoading(false));
+//   }
+// }
+
 function* getStudent(action) {
   try {
     const response = yield call(viewInvoice, action.payload);
     yield put(_saveStudent(response?.data?.data));
+    yield put(paymentList(response?.data?.payment));
+
   } catch (e) {
     toast.error(e?.response?.statusText || e?.response?.data?.message);
     yield put(setLoading(false));
   }
 }
+function* viewPayments(action) {
+  try {
+    const response = yield call(viewInvoice, action.payload);
+    yield put(paymentList(response?.data?.payment));
+    // yield put(_saveStudent(response?.data));
 
+  } catch (e) {
+    toast.error(e?.response?.statusText || e?.response?.data?.message);
+    yield put(setLoading(false));
+  }
+}
 function* deleteStudent(action) {
   try {
     const response = yield call(removeStudent, action?.payload.clientId);
@@ -112,7 +144,7 @@ function* downloadPdf(action) {
     const response = yield call(_downloadPdf, action?.payload);
     yield put(setLoading(true));
 
-    if(response.status === 200){
+    if (response.status === 200) {
       window.open(response?.data?.url);
       yield put(setPDFUrl(response?.data?.url));
     }
@@ -122,7 +154,31 @@ function* downloadPdf(action) {
     yield put(setLoading(false));
   }
 }
+function* filterStudents(action) {
+  try {
 
+    yield put(filterStudent(action.payload));
+
+
+
+  } catch (error) {
+    // 
+  }
+
+}
+
+function* addPaymentData(action) {
+  try {
+    const response = yield call(addPayment, action?.payload);
+    yield put(setLoading(true));
+
+
+
+
+  } catch (e) {
+    // 
+  }
+}
 export function* studentsSaga() {
   yield takeLatest(GET_STUDENTS, getStudents);
   yield takeLatest(DELETE_STUDENT, deleteStudent);
@@ -130,4 +186,8 @@ export function* studentsSaga() {
   yield takeLatest(DOWNLOAD_PDF, downloadPdf);
   yield takeLatest(UPDATE_STUDENT, updateStudent);
   yield takeLatest(GET_STUDENT, getStudent);
+  yield takeLatest(ADD_PAYMENT, addPaymentData);
+  // yield takeLatest(VIEW_INVOICE, getViewInvoice);
+  yield takeLatest(VIEW_PAYMENTS, viewPayments)
+  yield takeLatest(FILTER_STUDENT, filterStudents)
 }

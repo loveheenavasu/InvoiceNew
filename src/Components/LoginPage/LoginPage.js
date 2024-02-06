@@ -24,7 +24,7 @@ export default function LoginPage() {
   const dispatch = useDispatch();
 
   React.useEffect(() => {
-    
+
     if (token) {
       localStorage.setItem("token", "Bearer " + token);
       dispatch({ type: GET_SENDER_COMPANY });

@@ -7,6 +7,9 @@ const initialState = {
   student: [],
   pdfUrl: "",
   totalStudents: 0,
+  paymentList: [],
+  searchQuery: ""
+
 };
 
 const students = createSlice({
@@ -21,6 +24,7 @@ const students = createSlice({
         loading: false,
       };
     },
+
     _saveStudent: (state, action) => {
       return {
         ...state,
@@ -28,6 +32,21 @@ const students = createSlice({
         loading: false,
       };
     },
+    _message: (state, action) => {
+      return {
+        ...state,
+        student: action?.payload,
+        loading: false,
+      }
+    },
+    paymentList: (state, action) => {
+      return {
+        ...state,
+        paymentList: action?.payload,
+        loading: false,
+      };
+    },
+
     setLoading: (state, action) => {
       return {
         ...state,
@@ -55,6 +74,14 @@ const students = createSlice({
         loading: false
       };
     },
+    filterStudent: (state, action) => {
+      return {
+        ...state,
+        searchQuery: action.payload,
+        loading: false
+      };
+
+    },
   },
 });
 
@@ -65,5 +92,8 @@ export const {
   studentCreating,
   _saveStudent,
   setPDFUrl,
+  paymentList,
+  filterStudent,
+  _message
 } = students.actions;
 export default students.reducer;

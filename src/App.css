@@ -3,6 +3,7 @@
   padding: 0px;
 }
 
+
 .css-ws2lyb,
 .css-hq3har,
 .css-9ezbem {
@@ -39,7 +40,18 @@
 }
 .main-container {
   height: calc(100vh - 196px);
+
 }
+
+.main_container{
+  width: 100%;
+  /* height: calc(100vh - 90px); */
+  height: 500px;
+  margin: 0;
+  /* margin-bottom: 20px; */
+  /* overflow-y: scroll; */
+}
+
 
 .invoice-container {
   width: 90% !important;
@@ -144,6 +156,18 @@
 }
 
 .emailError {
+  font-size: 11px !important;
+  color: #cf0d0d;
+  width: 85%;
+  padding-top: 2px;
+}
+.newDepositError {
+  font-size: 11px !important;
+  color: #cf0d0d;
+  width: 85%;
+  padding-top: 2px;
+}
+.paymentMethodError {
   font-size: 11px !important;
   color: #cf0d0d;
   width: 85%;

@@ -15,6 +15,6 @@ function* loginUser(action) {
   }
 }
 
-export function* authSaga() {
+export function* authSaga() { 
   yield takeLatest(LOGIN_USER, loginUser);
 }

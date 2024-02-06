@@ -110,8 +110,8 @@ function* downloadPdf(action) {
     const response = yield call(_downloadPdf, action?.payload);
     yield put(setLoading(true));
 
-    if(response.status === 200){
-      window.open(response?.data?.url);
+    if (response.status === 200) {
+      // window.open(response?.data?.url);
       yield put(setPDFUrl(response?.data?.url));
     }
 
@@ -175,7 +175,7 @@ function* updatePayment(action) {
     const response = yield call(update_payment, action);
     if (response.status === 200) {
       yield put(setUpdateList(response.data))
-      yield put ({type: PAYMENT_LIST, payload:{ id: response.data.paid_amount.invoice_id}})
+      yield put({ type: PAYMENT_LIST, payload: { id: response.data.paid_amount.invoice_id } })
       yield put({ type: GET_INVOICES });
       toast.success("Payment has been updated successfully");
     }

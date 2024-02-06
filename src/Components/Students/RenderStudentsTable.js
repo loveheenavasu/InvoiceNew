@@ -13,6 +13,7 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
 import { useDispatch, useSelector } from "react-redux";
+
 import {
   DELETE_STUDENT,
   DOWNLOAD_PDF,
@@ -35,13 +36,13 @@ const columns = [
   { id: "fee", label: "Course Fee (Rs)", minWidth: 100 },
   { id: "discount", label: "Discount (%)", minWidth: 100 },
   { id: "after_discount_fee", label: "Fee After Discount (Rs)", minWidth: 100 },
-  { id: "deposit", label: "Deposit (Rs)", minWidth: 100 },
-  { id: "payment_method", label: "Payment Method", minWidth: 100 },
+  { id: "pending", label: "Pending (Rs)", minWidth: 100 },
+  // { id: "deposit", label: "Deposit (Rs)", minWidth: 100 },
   { id: "actions", label: "ACTIONS", minWidth: 100 },
 ];
 
 export const RenderStudentsTable = () => {
-  const { loading, students, totalStudents } = useSelector(
+  const { loading, students, totalStudents, searchQuery } = useSelector(
     (state) => state.Students
   );
 
@@ -59,8 +60,8 @@ export const RenderStudentsTable = () => {
 
   React.useEffect(() => {
     dispatch(setLoading(true));
-    dispatch({ type: GET_STUDENTS, payload: { page: page, row: rowsPerPage } });
-  }, [dispatch, page, rowsPerPage]);
+    dispatch({ type: GET_STUDENTS, payload: { page: page, row: rowsPerPage, search: searchQuery } });
+  }, [dispatch, page, rowsPerPage, searchQuery]);
 
   const handleChangePage = React.useCallback(
     (event, newPage) => {
@@ -99,16 +100,6 @@ export const RenderStudentsTable = () => {
     dispatch({ type: DELETE_STUDENT, payload: payload });
   };
 
-  // React.useEffect(() => {
-  //   const totalPages = Math.ceil(totalStudents / rowsPerPage) - 1;
-
-  //   if (totalPages === 0) {
-  //     handleChangePage(null, 0);
-  //   } else if (page > totalPages) {
-  //     handleChangePage(null, totalPages);
-  //   }
-  // }, [totalStudents, rowsPerPage, page, handleChangePage]);
-
   const editStudent = (index) => {
     localStorage.setItem("studentcreating", true);
     const student = students[index];
@@ -121,29 +112,34 @@ export const RenderStudentsTable = () => {
   };
   const downloadInvoicePdf = (index) => {
     const invoice_id = students[index].id;
+    console.log("DOWNLOAD_PDF")
     dispatch(setLoading(true));
     dispatch({ type: DOWNLOAD_PDF, payload: invoice_id });
   };
 
   React.useEffect(() => {
-    const _students = students?.map((student, ind) => {
-      return {
-        student_id: student.id || "_",
-        name: student.name || "-",
-        email: student.email || "-",
-        phone: student.phone || "-",
-        address: student.address || "-",
-        course: student.course || "_",
-        duration: student.course_duration || "_",
-        fee: student.course_fee || "_",
-        discount: student.discount || "_",
-        deposit: student.deposit_amount || "_",
-        payment_method: student.payment_method || "_",
-        after_discount_fee: student.after_discount_fee || "_",
-        actions: "",
-      };
-    });
-    setStudentData(_students);
+    if (students?.length > 0) {
+      const _students = students?.map((student, ind) => {
+        return {
+          student_id: student.id || "_",
+          name: student.name || "-",
+          email: student.email || "-",
+          phone: student.phone || "-",
+          address: student.address || "-",
+          course: student.course || "_",
+          duration: student.course_duration || "_",
+          fee: student.course_fee || "_",
+          discount: student.discount || "_",
+          pending: student.pending_amount || "_",
+          after_discount_fee: student.after_discount_fee || "_",
+          actions: "",
+        };
+      });
+      setStudentData(_students);
+    }
+    else{
+      setStudentData({});
+    }
   }, [students]);
 
   return (

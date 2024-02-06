@@ -50,7 +50,7 @@ export const CreateInvoice = () => {
   });
   const paymentMethods = [
     "Google Pay",
-    "Phone Pay",
+    "PhonePe",
     "Net Banking",
     "Credit Card",
     "Debit Card",

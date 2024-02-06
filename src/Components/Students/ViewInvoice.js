@@ -22,6 +22,7 @@ import {
 } from "../../Store/Action_Constants";
 import Spinner from "../Spinner/Spinner";
 
+
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
   "&:nth-of-type(odd)": {
     // backgroundColor: "rgb(243 243 243);",
@@ -36,11 +37,18 @@ export const ViewInvoice = (props) => {
   const { senderCompany: companyData } = useSelector(
     (state) => state.senderCompanyInfo
   );
-  const { loading, student: data } = useSelector((state) => state.Students);
+
+  const { loading, student: data, paymentList } = useSelector((state) => state.Students);
+
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
 
   useEffect(() => {
     dispatch(setLoading(true));
-    dispatch({ type: GET_STUDENT, payload: location.state.invoice_id });
+    dispatch({ type: GET_STUDENT, payload: location?.state.invoice_id });
+
   }, [dispatch, location.state.invoice_id]);
 
   useEffect(() => {
@@ -53,21 +61,39 @@ export const ViewInvoice = (props) => {
     dispatch({ type: DOWNLOAD_PDF, payload: invoice_id });
   };
 
+
   const columns = [
-    { id: "course", label: "Course Name", name: "fffff" },
-    { id: "duration", label: "Duration", name: "cccc" },
-    { id: "course fee", label: "Course Fee (Rs)", name: "ggggg" },
-    { id: "discount", label: "Discount (%)", name: "ggggg" },
-    { id: "total", label: "Total (Rs)", name: "ggggg" },
+    { id: "date", label: "Date", name: "fffff" },
+    { id: "payment_mode", label: "Payment Mode", name: "cccc" },
+    { id: "received_amount", label: "Received", name: "ggggg" },
+    { id: "pending_amount", label: "Pending", name: "ggggg" },
+    // { id: "total", label: "Total (Rs)", name: "ggggg" },
   ];
 
-  function formatDate(dateString) {  
+  function formatDate(dateString) {
     const date = new Date(dateString);
     const formattedMonth = String(date.getUTCMonth() + 1).padStart(2, '0');
     const formattedYear = String(date.getUTCFullYear()).slice(-2);
     return `${formattedMonth}-${formattedYear}`;
   }
-  
+
+  function fullDate(dateString) {
+    const dateObject = new Date(dateString);
+    const year = dateObject.getFullYear();
+    // const month = dateObject.getMonth() + 1; // Months are 0-indexed, so add 1
+    const month = monthNames[dateObject.getMonth()]
+    const day = dateObject.getDate();
+    return `${month} ${day}, ${year}`
+  }
+
+  let totalReceivedAmount = 0;
+
+  const totalRecieved = paymentList.map((data) => {
+    totalReceivedAmount += data?.received_amount;
+    return data?.received_amount;
+  }
+
+  )
 
   return (
     <ProtectedRoute>
@@ -127,15 +153,23 @@ export const ViewInvoice = (props) => {
               marginRight: "4rem",
             }}
           >
-            <Typography
-              sx={{ marginLeft: 18, color: "#EF7CB5", fontWeight: 900 }}
-            >
-              Invoice Date:- {new Date(data.created_at).toLocaleString()}
-            </Typography>
-            <div>
+            <Grid>
+              <Typography
+                sx={{ marginLeft: 18, color: "#EF7CB5", fontWeight: 900 }}
+              >
+                Invoice Number:- {`ZT/${formatDate(data?.created_at)}/00${data?.id}`}
+              </Typography>
+            </Grid>
+
+            <div style={{ display: "flex", gap: "73px" }}>
+              <Typography
+                sx={{ color: "#EF7CB5", fontWeight: 900 }}
+              >
+                Invoice Date:- {new Date(data?.created_at).toLocaleString()}
+              </Typography>
               <Tooltip title="Download Invoice">
                 <DownloadIcon
-                  onClick={() => downloadInvoice()}
+                  onClick={downloadInvoice}
                   className="cursor_pointer"
                 />
               </Tooltip>
@@ -143,7 +177,7 @@ export const ViewInvoice = (props) => {
           </Box>
 
           <Grid container spacing={2} sx={{ marginTop: 1.5, ml: 0.2 }}>
-            <Grid item xs={7.5}>
+            <Grid item xs={6}>
               <Box>
                 <Typography
                   variant="h5"
@@ -221,45 +255,111 @@ export const ViewInvoice = (props) => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={4}>
-              <Typography
-                variant="h5"
-                sx={{
-                  fontWeight: 500,
-                  fontSize: "22px",
-                  // marginTop: 1,
-                  color: "#66666C",
-                }}
-              >
+            <Grid item xs={5} sx={{ ml: "-10px" }}>
+              <Box>
+                <Typography
+                  variant="h5"
+                  sx={{ fontWeight: 600, marginLeft: 16 }}
+                >
+                  Course Details
+                </Typography>
+                <Box sx={{ display: "flex" }}>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      fontWeight: 500,
+                      fontSize: "18px",
+                      marginTop: 1,
+                      marginLeft: "8rem",
+                      color: "#66666C",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontWeight: 500,
+                        display: "inline",
+                        fontSize: "18px",
+                        color: "black",
+                      }}
+                    >
+                      Name: {""}
+                    </Typography>
+                    {data?.course}
+                  </Typography>
+                </Box>
                 <Typography
                   variant="h5"
                   sx={{
-                    display: "inline",
-                    fontWeight: 600,
-                    color: "black",
+                    fontWeight: 500,
+                    fontSize: "18px",
+                    marginTop: 1,
+                    marginLeft: "8rem",
+                    color: "#66666C",
                   }}
                 >
-                  Registration # {""}
+                  <Typography
+                    sx={{
+                      fontWeight: 500,
+                      display: "inline",
+                      fontSize: "18px",
+                      color: "black",
+                    }}
+                  >
+                    Course Duration: {""}
+                  </Typography>
+                  {data?.course_duration}
                 </Typography>
-                {companyData[0]?.register_no}
-              </Typography>
-
-              <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                Invoice #
-              </Typography>
-              <Typography variant="h6" sx={{ color: "gray", marginTop: 1 }}>
-                {`ZT/${formatDate(data?.created_at)}/00${data?.id}`}
-              </Typography>
-
-              <Typography
-                variant="h5"
-                sx={{ fontWeight: 600, color: "#585555", marginTop: 2 }}
-              ></Typography>
-              <Typography
-                variant="h6"
-                sx={{ color: "gray", marginTop: 1 }}
-              ></Typography>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: 500,
+                    fontSize: "18px",
+                    marginTop: 1,
+                    marginLeft: "8rem",
+                    color: "#66666C",
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontWeight: 500,
+                      display: "inline",
+                      fontSize: "18px",
+                      color: "black",
+                    }}
+                  >
+                    Fees: {""}
+                  </Typography>
+                  {data?.course_fee} {" "} {data?.discount !== 0 && `(${data?.discount}%)`
+                  }
+                </Typography>
+                {data?.discount !== 0 && <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: 500,
+                    fontSize: "18px",
+                    marginTop: 1,
+                    marginLeft: "8rem",
+                    color: "#66666C",
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontWeight: 500,
+                      display: "inline",
+                      fontSize: "18px",
+                      color: "black",
+                    }}
+                  >
+                    Fees After Discount: {""}
+                  </Typography>
+                  {data?.after_discount_fee}
+                </Typography>}
+              </Box>
             </Grid>
+
           </Grid>
           <Typography
             variant="h5"
@@ -298,16 +398,18 @@ export const ViewInvoice = (props) => {
                   ))}
                 </TableRow>
               </TableHead>
+
+
               <TableBody>
-                <>
-                  <StyledTableRow>
-                    <TableCell>{data?.course}</TableCell>
-                    <TableCell>{data?.course_duration}</TableCell>
-                    <TableCell>{data?.course_fee}</TableCell>
-                    <TableCell>{data?.discount}</TableCell>
-                    <TableCell>{data?.after_discount_fee}</TableCell>
+
+                {paymentList?.map((payment, index) => (
+                  <StyledTableRow key={index}>
+                    <TableCell>{payment?.deposit_date}</TableCell>
+                    <TableCell>{payment?.payment_method}</TableCell>
+                    <TableCell>{payment?.received_amount}</TableCell>
+                    <TableCell>{payment?.pending_amount}</TableCell>
                   </StyledTableRow>
-                </>
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
@@ -329,12 +431,12 @@ export const ViewInvoice = (props) => {
                     sx={{
                       fontWeight: 800,
                       fontSize: "22px",
-                      marginTop: 2,
+                      marginTop: 4,
                       color: "#EF7CB5",
                       // marginRight: 0,
                     }}
                   >
-                    Total Amount Received:- INR {data.deposit_amount}
+                    Total Amount Received:- INR {totalReceivedAmount}
                   </Typography>
                 </Grid>
               </Grid>
@@ -386,10 +488,10 @@ export const ViewInvoice = (props) => {
               </Typography>
             </Box>
           </Box>
-        </Container>
+        </Container >
       )}
 
       <Footer />
-    </ProtectedRoute>
+    </ProtectedRoute >
   );
 };
