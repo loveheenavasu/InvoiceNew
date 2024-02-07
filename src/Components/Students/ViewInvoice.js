@@ -76,6 +76,8 @@ export const ViewInvoice = (props) => {
     const formattedYear = String(date.getUTCFullYear()).slice(-2);
     return `${formattedMonth}-${formattedYear}`;
   }
+  const currentDate = new Date();
+const formattedDate = `${currentDate.getDate().toString().padStart(2, '0')}/${(currentDate.getMonth() + 1).toString().padStart(2, '0')}/${currentDate.getFullYear()}`;
 
   function fullDate(dateString) {
     const dateObject = new Date(dateString);
@@ -136,13 +138,13 @@ export const ViewInvoice = (props) => {
             >
               {companyData[0]?.address}
             </Typography>
-            <Typography
+            {/* <Typography
               sx={{
                 fontWeight: 700,
               }}
             >
               +91 {companyData[0]?.phone}
-            </Typography>
+            </Typography> */}
           </Box>
 
           <Box
@@ -161,11 +163,12 @@ export const ViewInvoice = (props) => {
               </Typography>
             </Grid>
 
-            <div style={{ display: "flex", gap: "73px" }}>
+            <div style={{ display: "flex", gap: "150px" }}>
               <Typography
                 sx={{ color: "#EF7CB5", fontWeight: 900 }}
               >
-                Invoice Date:- {new Date(data?.created_at).toLocaleString()}
+                Invoice Date:- {formattedDate}
+                {/* Invoice Date:- {fullDate(data?.created_at)} */}
               </Typography>
               <Tooltip title="Download Invoice">
                 <DownloadIcon
@@ -332,7 +335,7 @@ export const ViewInvoice = (props) => {
                   >
                     Fees: {""}
                   </Typography>
-                  {data?.course_fee} {" "} {data?.discount !== 0 && `(${data?.discount}%)`
+                  {data?.course_fee} {" "} {data?.discount !== 0 && `(Dis-  ${data?.discount}%)`
                   }
                 </Typography>
                 {data?.discount !== 0 && <Typography
@@ -407,7 +410,7 @@ export const ViewInvoice = (props) => {
                     <TableCell>{payment?.deposit_date}</TableCell>
                     <TableCell>{payment?.payment_method}</TableCell>
                     <TableCell>{payment?.received_amount}</TableCell>
-                    <TableCell>{payment?.pending_amount}</TableCell>
+                    <TableCell>{payment?.pending_amount !== 0 ? payment?.pending_amount : "-" }</TableCell>
                   </StyledTableRow>
                 ))}
               </TableBody>
