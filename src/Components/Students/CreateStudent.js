@@ -6,8 +6,8 @@ import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
-import AddIcon from '@mui/icons-material/Add';
-import CloseIcon from '@mui/icons-material/Close';
+import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import ProtectedRoute from "../../Routes/ProtectedRoute";
 import { toast } from "react-toastify";
@@ -24,7 +24,13 @@ import Spinner from "../Spinner/Spinner";
 import { useNavigate, useParams } from "react-router-dom";
 import { Navbar } from "../Navbar/Navbar";
 import { Footer } from "../Footer/Footer";
-import { FormControl, IconButton, InputLabel, MenuItem, Select } from "@mui/material";
+import {
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+} from "@mui/material";
 const theme = createTheme();
 
 export default function CreateStudent() {
@@ -89,8 +95,12 @@ export default function CreateStudent() {
 
   const validateInputList = () => {
     for (const item of inputList) {
-      if (item.newDepositeValue.trim() === '' || item.newPaymentMethod.trim() === '' || item.newDepositDate.trim() === "") {
-        console.error('Error: All fields must be filled');
+      if (
+        item.newDepositeValue.trim() === "" ||
+        item.newPaymentMethod.trim() === "" ||
+        item.newDepositDate.trim() === ""
+      ) {
+        console.error("Error: All fields must be filled");
         return true;
       }
     }
@@ -100,18 +110,20 @@ export default function CreateStudent() {
 
   const totalPaidAmount = list.reduce(
     (accumulator, currentValue) => accumulator + +currentValue.newDepositeValue,
-    0,
-  )
+    0
+  );
 
   const handleSubmit = (event) => {
     event.preventDefault();
     if (id && validateInputList()) {
-      toast.error("Please fill all the required fields")
-      return
+      toast.error("Please fill all the required fields");
+      return;
     }
     if (totalPaidAmount > lastPendingAmount) {
-      toast.error(`Deposit amount should not exceed the pending amount. Last pending amount: ${lastPendingAmount}`);
-      return
+      toast.error(
+        `Deposit amount should not exceed the pending amount. Last pending amount: ${lastPendingAmount}`
+      );
+      return;
     }
 
     const studentInfoPayload = new FormData();
@@ -139,7 +151,6 @@ export default function CreateStudent() {
       !studentInfo.deposit_amount ||
       !studentInfo.payment_method ||
       (!id && !studentInfo.deposit_date)
-
     ) {
       toast.error("Please fill all the required fields", {
         toastId: "sender_form",
@@ -162,10 +173,10 @@ export default function CreateStudent() {
         payment_method: item?.newPaymentMethod,
         deposit_amount: Number(item?.newDepositeValue),
         student_id: id,
-        deposit_date: item?.newDepositDate
-      }
-      return data
-    })
+        deposit_date: item?.newDepositDate,
+      };
+      return data;
+    });
 
     if (id) {
       dispatch({
@@ -177,7 +188,6 @@ export default function CreateStudent() {
         payload: paymentData,
       });
       return;
-
     }
 
     dispatch({
@@ -187,13 +197,12 @@ export default function CreateStudent() {
   };
 
   React.useEffect(() => {
-
     if (id) {
-
-      const pendingAmount = student?.after_discount_fee - student?.deposit_amount || 0;
-      setStudentInfo({ ...student, totalToBeDepositAmount: pendingAmount })
-      setPendingAmount(pendingAmount)
-    };
+      const pendingAmount =
+        student?.after_discount_fee - student?.deposit_amount || 0;
+      setStudentInfo({ ...student, totalToBeDepositAmount: pendingAmount });
+      setPendingAmount(pendingAmount);
+    }
   }, [id, student]);
 
   React.useEffect(() => {
@@ -303,8 +312,7 @@ export default function CreateStudent() {
             "Deposit amount cannot be greater than after discount fee"
           ),
         }));
-      }
-      else {
+      } else {
         setError((prevError) => ({
           ...prevError,
           deposit_amount: "",
@@ -315,9 +323,7 @@ export default function CreateStudent() {
           [e.target.name]: depositAmount,
         }));
       }
-    }
-    else {
-
+    } else {
       setStudentInfo((prevStudentInfo) => ({
         ...prevStudentInfo,
         [e.target.name]: e.target.value,
@@ -330,15 +336,13 @@ export default function CreateStudent() {
           ...prevError,
           depositDate: "please enter date",
         }));
-      }
-      else {
+      } else {
         setStudentInfo((prevStudentInfo) => ({
           ...prevStudentInfo,
           [e.target.name]: e.target.value,
         }));
       }
-    }
-    else {
+    } else {
       setStudentInfo((prevStudentInfo) => ({
         ...prevStudentInfo,
         [e.target.name]: e.target.value,
@@ -361,46 +365,57 @@ export default function CreateStudent() {
   const handleCloseAppendFields = (index) => {
     const list = [...inputList];
     const removeData = list.filter((_, indexfilter) => indexfilter !== index);
-    setError((prevError) => ({ ...prevError, [`newDepositeValue_${index}`]: "", }))
+    setError((prevError) => ({
+      ...prevError,
+      [`newDepositeValue_${index}`]: "",
+    }));
     setInputList(removeData);
-  }
+  };
 
   const handleAppendColumn = () => {
-    const totalPendingAmount = inputList.reduce(function (acc, obj) { return acc + (+obj.newDepositeValue); }, 0);
-    const pendingAmountToBePaid = studentInfo?.after_discount_fee - totalPendingAmount;
+    const totalPendingAmount = inputList.reduce(function (acc, obj) {
+      return acc + +obj.newDepositeValue;
+    }, 0);
+    const pendingAmountToBePaid =
+      studentInfo?.after_discount_fee - totalPendingAmount;
     if (pendingAmountToBePaid === 0) {
-
     }
 
-    setPendingAmount(pendingAmountToBePaid)
+    setPendingAmount(pendingAmountToBePaid);
     if (pendingAmountToBePaid !== 0) {
-      setInputList([...inputList, { id: Date.now(), newDepositeValue: "", newPaymentMethod: "", newDepositDate: "" }]);
+      setInputList([
+        ...inputList,
+        {
+          id: Date.now(),
+          newDepositeValue: "",
+          newPaymentMethod: "",
+          newDepositDate: "",
+        },
+      ]);
     }
-
-  }
+  };
 
   const handleInputChange = (e, index) => {
     let { name, value } = e.target;
     const list = [...inputList];
     if (name === "newDepositeValue" && value === "") {
-      list[index]['depositError'] = 'Deposit amount required';
-    }
-    else if (name === "newDepositeValue" && value !== "") {
-      list[index]['depositError'] = '';
+      list[index]["depositError"] = "Deposit amount required";
+    } else if (name === "newDepositeValue" && value !== "") {
+      list[index]["depositError"] = "";
     }
 
     if (name === "newPaymentMethod") {
-      if (value.trim() === '') {
-        list[index]['paymentMethodError'] = 'Payment Method is required';
+      if (value.trim() === "") {
+        list[index]["paymentMethodError"] = "Payment Method is required";
       } else {
-        list[index]['paymentMethodError'] = '';
+        list[index]["paymentMethodError"] = "";
       }
     }
     if (name === "newSelectedDate" && value === "") {
-      if (value.trim() === '') {
-        list[index]['newDepositDateError'] = 'Deposit Date is required';
+      if (value.trim() === "") {
+        list[index]["newDepositDateError"] = "Deposit Date is required";
       } else {
-        list[index]['newDepositDateError'] = '';
+        list[index]["newDepositDateError"] = "";
       }
     }
 
@@ -447,7 +462,9 @@ export default function CreateStudent() {
                       value={studentInfo?.name}
                     />
                     {error.name && (
-                      <Typography className="emailError">{error.name}</Typography>
+                      <Typography className="emailError">
+                        {error.name}
+                      </Typography>
                     )}
                   </Grid>
                   <Grid item xs={6}>
@@ -481,7 +498,9 @@ export default function CreateStudent() {
                       onChange={handleInput}
                       value={studentInfo.phone}
                     />
-                    <Typography className="emailError">{error.phone}</Typography>
+                    <Typography className="emailError">
+                      {error.phone}
+                    </Typography>
                   </Grid>
                   <Grid item xs={6}>
                     <TextField
@@ -515,7 +534,7 @@ export default function CreateStudent() {
                         onChange={handleInput}
                         disabled={id ? true : false}
                       >
-                        {durations.sort().map((duration, ind) => (
+                        {durations.map((duration, ind) => (
                           <MenuItem value={duration} key={ind}>
                             {duration}
                           </MenuItem>
@@ -602,17 +621,24 @@ export default function CreateStudent() {
                       />
                     </Box>
                   </Grid>
-
                 </Grid>
-                <Grid>
-
-                </Grid>
-                {
-                  id && paymentList.map((items, index) => {
+                <Grid></Grid>
+                {id &&
+                  paymentList.map((items, index) => {
                     return (
                       <Grid xs={12} key={items.id} sx={{ display: "flex" }}>
                         <Grid container spacing={1}>
-                          <Grid item xs={id && index === PaymentListLength - 1 && lastPendingAmount !== 0 ? 3.4 : 3.9} sx={{ mr: "3px" }}>
+                          <Grid
+                            item
+                            xs={
+                              id &&
+                              index === PaymentListLength - 1 &&
+                              lastPendingAmount !== 0
+                                ? 3.4
+                                : 3.9
+                            }
+                            sx={{ mr: "3px" }}
+                          >
                             <Box sx={{ width: "100%", marginTop: 2 }}>
                               <TextField
                                 required
@@ -624,12 +650,24 @@ export default function CreateStudent() {
                                 // name="new_deposit_amount"
                                 autoComplete="new_deposit_amount"
                                 disabled={id ? true : false}
-                                inputProps={{ sx: { height: 10, marginTop: 1 } }}
+                                inputProps={{
+                                  sx: { height: 10, marginTop: 1 },
+                                }}
                                 value={items?.received_amount}
                               />
                             </Box>
                           </Grid>
-                          <Grid item xs={id && index === PaymentListLength - 1 && lastPendingAmount !== 0 ? 3.7 : 3.8} sx={{ mr: "9px", mt: 2 }}>
+                          <Grid
+                            item
+                            xs={
+                              id &&
+                              index === PaymentListLength - 1 &&
+                              lastPendingAmount !== 0
+                                ? 3.7
+                                : 3.8
+                            }
+                            sx={{ mr: "9px", mt: 2 }}
+                          >
                             {/* <TextField
                               required
                               fullWidth
@@ -644,11 +682,10 @@ export default function CreateStudent() {
                             /> */}
                             <TextField
                               required
-                              
                               fullWidth
                               name="date"
                               id="new_selected_date"
-                              label= "deposit date"
+                              label="deposit date"
                               // name="new_deposit_amount"
                               autoComplete="new_selected_date"
                               disabled={id ? true : false}
@@ -656,11 +693,26 @@ export default function CreateStudent() {
                               value={items?.deposit_date}
                             />
                           </Grid>
-                          <Grid xs={id && lastPendingAmount !== 0 && PaymentListLength - 1 === index ? 3.744 : 4}>
-                            <FormControl sx={{ width: "100%", marginTop: 2 }} required>
-                              <InputLabel id="demo-simple-select-label" sx={{
-                                height: 50, marginTop: 1
-                              }}>
+                          <Grid
+                            xs={
+                              id &&
+                              lastPendingAmount !== 0 &&
+                              PaymentListLength - 1 === index
+                                ? 3.744
+                                : 4
+                            }
+                          >
+                            <FormControl
+                              sx={{ width: "100%", marginTop: 2 }}
+                              required
+                            >
+                              <InputLabel
+                                id="demo-simple-select-label"
+                                sx={{
+                                  height: 50,
+                                  marginTop: 1,
+                                }}
+                              >
                                 Payment Method
                               </InputLabel>
                               <Select
@@ -684,70 +736,106 @@ export default function CreateStudent() {
                                 </Typography>
                               )}
                             </FormControl>
-
                           </Grid>
-                          {id && lastPendingAmount !== 0 && PaymentListLength - 1 === index &&
-                            <IconButton color="primary" sx={{ mt: 2 }} >
-                              <AddIcon sx={{ fontSize: "26px" }} onClick={handleAppendColumn} />
-                            </IconButton>}
+                          {id &&
+                            lastPendingAmount !== 0 &&
+                            PaymentListLength - 1 === index && (
+                              <IconButton color="primary" sx={{ mt: 2 }}>
+                                <AddIcon
+                                  sx={{ fontSize: "26px" }}
+                                  onClick={handleAppendColumn}
+                                />
+                              </IconButton>
+                            )}
                         </Grid>
                       </Grid>
-                    )
-                  })
-                }
-                {!id && <Grid xs={12} sx={{ display: "flex" }}>
-                  <Grid container spacing={1}>
-                    <Grid item xs={id && totalPaidAmount !== lastPendingAmount ? 5.1 : 5.8} sx={{ mr: "9px" }}>
-                      <Box sx={{ width: "100%", marginTop: 2 }}>
-                        <TextField
+                    );
+                  })}
+                {!id && (
+                  <Grid xs={12} sx={{ display: "flex" }}>
+                    <Grid container spacing={1}>
+                      <Grid
+                        item
+                        xs={
+                          id && totalPaidAmount !== lastPendingAmount
+                            ? 5.1
+                            : 5.8
+                        }
+                        sx={{ mr: "9px" }}
+                      >
+                        <Box sx={{ width: "100%", marginTop: 2 }}>
+                          <TextField
+                            required
+                            fullWidth
+                            type="number"
+                            id="deposit_amount"
+                            label="Deposit Amount"
+                            name="deposit_amount"
+                            autoComplete="deposit_amount"
+                            inputProps={{ sx: { height: 10, marginTop: 1 } }}
+                            value={studentInfo?.deposit_amount}
+                            onChange={handleInput}
+                            disabled={id ? true : false}
+                          />
+                        </Box>
+                      </Grid>
+                      <Grid
+                        xs={
+                          id && totalPaidAmount !== lastPendingAmount ? 5.8 : 6
+                        }
+                      >
+                        <FormControl
+                          sx={{ width: "100%", marginTop: 2 }}
                           required
-                          fullWidth
-                          type="number"
-                          id="deposit_amount"
-                          label="Deposit Amount"
-                          name="deposit_amount"
-                          autoComplete="deposit_amount"
-                          inputProps={{ sx: { height: 10, marginTop: 1 } }}
-                          value={studentInfo?.deposit_amount}
-                          onChange={handleInput}
-                          disabled={id ? true : false}
-                        />
-                      </Box>
-                    </Grid>
-                    <Grid xs={id && totalPaidAmount !== lastPendingAmount ? 5.8 : 6}>
-                      <FormControl sx={{ width: "100%", marginTop: 2 }} required>
-                        <InputLabel id="demo-simple-select-label" sx={{
-                          height: 50, marginTop: 1
-                        }}>
-                          Payment Method
-                        </InputLabel>
-                        <Select
-                          labelId="payment_method"
-                          id="payment_method"
-                          name="payment_method"
-                          value={studentInfo?.payment_method}
-                          label="payment_type"
-                          sx={{ height: 50, marginTop: 1 }}
-                          onChange={handleInput}
-                          disabled={id ? true : false}
                         >
-                          {paymentMethods.map((method) => (
-                            <MenuItem key={method} value={method}>
-                              {method}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-
+                          <InputLabel
+                            id="demo-simple-select-label"
+                            sx={{
+                              height: 50,
+                              marginTop: 1,
+                            }}
+                          >
+                            Payment Method
+                          </InputLabel>
+                          <Select
+                            labelId="payment_method"
+                            id="payment_method"
+                            name="payment_method"
+                            value={studentInfo?.payment_method}
+                            label="payment_type"
+                            sx={{ height: 50, marginTop: 1 }}
+                            onChange={handleInput}
+                            disabled={id ? true : false}
+                          >
+                            {paymentMethods.map((method) => (
+                              <MenuItem key={method} value={method}>
+                                {method}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      {id && totalPaidAmount !== lastPendingAmount && (
+                        <IconButton
+                          color="primary"
+                          sx={{ mt: 2 }}
+                          disabled={
+                            student?.pending_amount === 0 || pendingAmount === 0
+                              ? true
+                              : false
+                          }
+                        >
+                          <AddIcon
+                            sx={{ fontSize: "25px" }}
+                            onClick={handleAppendColumn}
+                          />
+                        </IconButton>
+                      )}
                     </Grid>
-                    {id && totalPaidAmount !== lastPendingAmount &&
-                      <IconButton color="primary" sx={{ mt: 2 }} disabled={student?.pending_amount === 0 || pendingAmount === 0 ? true : false}>
-                        <AddIcon sx={{ fontSize: "25px" }} onClick={handleAppendColumn} />
-                      </IconButton>}
                   </Grid>
-                </Grid>}
-                {
-                  !id && <Box sx={{ width: "100%", marginTop: 2 }}>
+                )}
+                {!id && (
+                  <Box sx={{ width: "100%", marginTop: 2 }}>
                     <TextField
                       required
                       fullWidth
@@ -756,12 +844,18 @@ export default function CreateStudent() {
                       // label="Date"
                       name="deposit_date"
                       // autoComplete="course_fee"
-                      inputProps={{ sx: { height: 10, marginTop: 1, color: "rgba(102, 102, 102, 1)" } }}
+                      inputProps={{
+                        sx: {
+                          height: 10,
+                          marginTop: 1,
+                          color: "rgba(102, 102, 102, 1)",
+                        },
+                      }}
                       value={studentInfo?.deposit_date}
                       onChange={handleInput}
                     />
                   </Box>
-                }
+                )}
                 {inputList.map((items, index) => {
                   return (
                     <Grid xs={12} key={items.id} sx={{ display: "flex" }}>
@@ -782,12 +876,20 @@ export default function CreateStudent() {
                               }}
                               onInput={(e) => {
                                 const inputValue = e.target.value;
-                                if (inputValue.length === 1 && inputValue.startsWith('0')) {
-                                  e.target.value = '';
+                                if (
+                                  inputValue.length === 1 &&
+                                  inputValue.startsWith("0")
+                                ) {
+                                  e.target.value = "";
                                 }
                               }}
                               onKeyDown={(e) => {
-                                if (e.key === 'e' || e.key === 'E' || e.key === '-' || e.key === ".") {
+                                if (
+                                  e.key === "e" ||
+                                  e.key === "E" ||
+                                  e.key === "-" ||
+                                  e.key === "."
+                                ) {
                                   e.preventDefault();
                                 }
                               }}
@@ -796,11 +898,11 @@ export default function CreateStudent() {
                               onChange={(e) => handleInputChange(e, index)}
                             />
                           </Box>
-                          {
-                            items?.depositError && <Typography className="newDepositError">
+                          {items?.depositError && (
+                            <Typography className="newDepositError">
                               {items?.depositError}
                             </Typography>
-                          }
+                          )}
                         </Grid>
                         <Grid item xs={3.7} sx={{ mr: "9px", mt: 2 }}>
                           <TextField
@@ -811,16 +913,29 @@ export default function CreateStudent() {
                             id="new_selected_date"
                             // name="new_deposit_amount"
                             autoComplete="new_selected_date"
-                            inputProps={{ sx: { height: 10, marginTop: 1, color: "rgba(102, 102, 102, 1)" } }}
+                            inputProps={{
+                              sx: {
+                                height: 10,
+                                marginTop: 1,
+                                color: "rgba(102, 102, 102, 1)",
+                              },
+                            }}
                             onChange={(e) => handleInputChange(e, index)}
                             value={items?.depositDate}
                           />
                         </Grid>
                         <Grid xs={3.744}>
-                          <FormControl sx={{ width: "100%", marginTop: 2 }} required>
-                            <InputLabel id="demo-simple-select-label" sx={{
-                              height: 50, marginTop: 1
-                            }}>
+                          <FormControl
+                            sx={{ width: "100%", marginTop: 2 }}
+                            required
+                          >
+                            <InputLabel
+                              id="demo-simple-select-label"
+                              sx={{
+                                height: 50,
+                                marginTop: 1,
+                              }}
+                            >
                               Payment Method
                             </InputLabel>
                             <Select
@@ -844,22 +959,24 @@ export default function CreateStudent() {
                               </Typography>
                             )}
                           </FormControl>
-
                         </Grid>
-                        {id &&
+                        {id && (
                           <IconButton color="primary" sx={{ mt: 2 }}>
-                            <CloseIcon sx={{ fontSize: "26px" }} onClick={() => {
-                              ; setError((prev) => ({
-                                ...prev,
-                                [`newDepositeValue_${index}`]: ""
-                              })); handleCloseAppendFields(index)
-                            }} />
+                            <CloseIcon
+                              sx={{ fontSize: "26px" }}
+                              onClick={() => {
+                                setError((prev) => ({
+                                  ...prev,
+                                  [`newDepositeValue_${index}`]: "",
+                                }));
+                                handleCloseAppendFields(index);
+                              }}
+                            />
                           </IconButton>
-                        }
+                        )}
                       </Grid>
                     </Grid>
-
-                  )
+                  );
                 })}
 
                 <Box mt={3}>
