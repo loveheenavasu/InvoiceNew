@@ -88,8 +88,6 @@ export default function CreateCourse() {
     }
   }, [dispatch, id]);
 
-
-
   React.useEffect(() => {
     if (
       !courseCreating &&
@@ -187,7 +185,8 @@ export default function CreateCourse() {
                       label="Courseduration"
                       onChange={handleInput}
                     >
-                      <MenuItem value="3-4 Months">3-4 Months</MenuItem>
+                      <MenuItem value="45 days">45 days</MenuItem>
+                      <MenuItem value="3 Months">3 months</MenuItem>
                       <MenuItem value="6 Months">6 Months</MenuItem>
                     </Select>
                   </FormControl>
